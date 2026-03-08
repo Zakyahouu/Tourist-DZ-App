@@ -72,8 +72,8 @@ export default function ProfileScreen() {
                     <View style={styles.guestIconCircle}>
                         <User size={40} stroke="#f97316" />
                     </View>
-                    <Text style={styles.guestTitle}>Welcome to {t('app.title')}</Text>
-                    <Text style={styles.guestSubtitle}>Join us to save your favorite places and register for unique events in Biskra.</Text>
+                    <Text style={styles.guestTitle}>{t('profile.welcome')} {t('app.title')}</Text>
+                    <Text style={styles.guestSubtitle}>{t('profile.guestSubtitle')}</Text>
                 </View>
 
                 <View style={styles.guestActions}>
@@ -93,12 +93,12 @@ export default function ProfileScreen() {
                 </View>
 
                 <View style={styles.guestMenu}>
-                    <MenuItem icon={Settings} title="General Settings" color="#64748b" onPress={() => Alert.alert('Settings', 'Coming soon')} />
-                    <MenuItem icon={Share2} title="About the Project" color="#64748b" onPress={() => Alert.alert('ToursticDZ', 'Smart tourism platform for Biskra, Algeria.')} />
+                    <MenuItem icon={Settings} title={t('profile.generalSettings')} color="#64748b" onPress={() => Alert.alert(t('profile.generalSettings'), t('profile.comingSoon'))} />
+                    <MenuItem icon={Share2} title={t('profile.aboutProject')} color="#64748b" onPress={() => Alert.alert('ToursticDZ', t('profile.aboutProjectDesc'))} />
                 </View>
 
                 <View style={[styles.section, { paddingHorizontal: 20, paddingTop: 10 }]}>
-                    <Text style={styles.sectionTitle}>Language</Text>
+                    <Text style={styles.sectionTitle}>{t('profile.language')}</Text>
                     <View style={styles.langRow}>
                         {LANGUAGES.map(lang => (
                             <TouchableOpacity
@@ -147,35 +147,35 @@ export default function ProfileScreen() {
                 <View style={styles.statsContainer}>
                     <View style={styles.statItem}>
                         <Text style={styles.statNumber}>{stats.favorites}</Text>
-                        <Text style={styles.statLabel}>Favorites</Text>
+                        <Text style={styles.statLabel}>{t('profile.favorites')}</Text>
                     </View>
                     <View style={[styles.statItem, styles.statBorder]}>
                         <Text style={styles.statNumber}>{stats.events}</Text>
-                        <Text style={styles.statLabel}>Events</Text>
+                        <Text style={styles.statLabel}>{t('profile.events')}</Text>
                     </View>
                     <View style={styles.statItem}>
                         <Text style={styles.statNumber}>{stats.reviews}</Text>
-                        <Text style={styles.statLabel}>Reviews</Text>
+                        <Text style={styles.statLabel}>{t('profile.reviews')}</Text>
                     </View>
                 </View>
             </View>
 
             <View style={styles.section}>
-                <Text style={styles.sectionTitle}>My Activity</Text>
-                <MenuItem icon={Heart} title="My Favorites" color="#ef4444" onPress={() => Alert.alert('Favorites', 'Coming soon')} />
-                <MenuItem icon={Calendar} title="My Registered Events" color="#3b82f6" onPress={() => Alert.alert('Events', 'Coming soon')} />
-                <MenuItem icon={Star} title="My Reviews" color="#f59e0b" onPress={() => Alert.alert('Reviews', 'Coming soon')} />
+                <Text style={styles.sectionTitle}>{t('profile.myActivity')}</Text>
+                <MenuItem icon={Heart} title={t('profile.myFavorites')} color="#ef4444" onPress={() => Alert.alert(t('profile.favorites'), t('profile.comingSoon'))} />
+                <MenuItem icon={Calendar} title={t('profile.myEvents')} color="#3b82f6" onPress={() => Alert.alert(t('profile.events'), t('profile.comingSoon'))} />
+                <MenuItem icon={Star} title={t('profile.myReviews')} color="#f59e0b" onPress={() => Alert.alert(t('profile.reviews'), t('profile.comingSoon'))} />
                 <MenuItem icon={Heart} title={t('solidarity.title')} color="#e11d48" onPress={() => router.push('/solidarity')} />
             </View>
 
             <View style={styles.section}>
-                <Text style={styles.sectionTitle}>Account Settings</Text>
-                <MenuItem icon={Settings} title="Personal Info" color="#64748b" onPress={() => Alert.alert('Personal Info', 'Coming soon')} />
-                <MenuItem icon={Shield} title="Privacy & Security" color="#64748b" onPress={() => Alert.alert('Privacy', 'Coming soon')} />
+                <Text style={styles.sectionTitle}>{t('profile.accountSettings')}</Text>
+                <MenuItem icon={Settings} title={t('profile.personalInfo')} color="#64748b" onPress={() => Alert.alert(t('profile.personalInfo'), t('profile.comingSoon'))} />
+                <MenuItem icon={Shield} title={t('profile.privacySecurity')} color="#64748b" onPress={() => Alert.alert(t('profile.privacySecurity'), t('profile.comingSoon'))} />
             </View>
 
             <View style={styles.section}>
-                <Text style={styles.sectionTitle}>Language</Text>
+                <Text style={styles.sectionTitle}>{t('profile.language')}</Text>
                 <View style={styles.langRow}>
                     {LANGUAGES.map(lang => (
                         <TouchableOpacity

@@ -22,6 +22,7 @@ export default function RootLayout() {
           <Stack.Screen name="(auth)" options={{ headerShown: false }} />
           <Stack.Screen name="site/[id]" options={{ headerShown: false }} />
           <Stack.Screen name="event/[id]" options={{ headerShown: false }} />
+          <Stack.Screen name="accommodation/[id]" options={{ headerShown: false }} />
           <Stack.Screen name="scanner" options={{ headerShown: false, presentation: 'fullScreenModal' }} />
           <Stack.Screen name="solidarity" options={{ headerShown: false }} />
           <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />

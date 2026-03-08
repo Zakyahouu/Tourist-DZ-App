@@ -28,17 +28,17 @@ export default function SignupScreen() {
     const handleSignup = async () => {
         const trimmedEmail = email.trim();
         if (!fullName.trim() || !trimmedEmail || !password) {
-            Alert.alert('Error', 'Please fill in all fields');
+            Alert.alert(t('common.error'), t('auth.fillAllFields'));
             return;
         }
 
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
-            Alert.alert('Error', 'Please enter a valid email address');
+            Alert.alert(t('common.error'), t('auth.invalidEmail'));
             return;
         }
 
         if (password.length < 6) {
-            Alert.alert('Error', 'Password must be at least 6 characters');
+            Alert.alert(t('common.error'), t('auth.passwordMinLength'));
             return;
         }
 
@@ -57,12 +57,12 @@ export default function SignupScreen() {
 
         setLoading(false);
         if (error) {
-            Alert.alert('Signup Failed', error.message);
+            Alert.alert(t('auth.signupFailed'), error.message);
         } else {
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
             Alert.alert(
-                'Success',
-                'Account created! Please check your email for verification.',
+                t('common.success'),
+                t('auth.signupSuccess'),
                 [{ text: 'OK', onPress: () => router.replace('/(auth)/login') }]
             );
         }
@@ -76,7 +76,7 @@ export default function SignupScreen() {
             <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
                 <View style={styles.header}>
                     <Text style={styles.title}>{t('app.createAccount')}</Text>
-                    <Text style={styles.subtitle}>Join the ToursticDZ community</Text>
+                    <Text style={styles.subtitle}>{t('app.joinCommunity')}</Text>
                 </View>
 
                 <View style={styles.form}>
@@ -84,7 +84,7 @@ export default function SignupScreen() {
                         <User size={20} stroke="#94a3b8" style={styles.inputIcon} />
                         <TextInput
                             style={styles.input}
-                            placeholder="Full Name"
+                            placeholder={t('app.fullName')}
                             placeholderTextColor="#94a3b8"
                             value={fullName}
                             onChangeText={setFullName}
@@ -134,7 +134,7 @@ export default function SignupScreen() {
 
                 <View style={styles.footer}>
                     <Text style={styles.footerText}>{t('app.alreadyHaveAccount')} </Text>
-                    <TouchableOpacity onPress={() => router.push('/login')}>
+                    <TouchableOpacity onPress={() => router.push('/(auth)/login')}>
                         <Text style={styles.loginText}>{t('app.login')}</Text>
                     </TouchableOpacity>
                 </View>

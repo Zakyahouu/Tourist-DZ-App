@@ -78,7 +78,19 @@ const resources = {
                 "scanned": "QR Code Scanned"
             },
             "auth": {
-                "loginRequired": "Login Required"
+                "loginRequired": "Login Required",
+                "fillAllFields": "Please fill in all fields",
+                "invalidEmail": "Please enter a valid email address",
+                "passwordMinLength": "Password must be at least 6 characters",
+                "loginFailed": "Login Failed",
+                "signupFailed": "Signup Failed",
+                "signupSuccess": "Account created! Please check your email for verification.",
+                "resetPassword": "Reset Password",
+                "resetPrompt": "Enter your email address above first, then tap Forgot Password.",
+                "resetConfirm": "A reset link will be sent to {{email}}",
+                "emailSent": "Email Sent",
+                "resetEmailSent": "Check your inbox for the password reset link.",
+                "send": "Send"
             },
             "common": {
                 "error": "Error",
@@ -113,7 +125,8 @@ const resources = {
                 "permissionRequired": "Media Library Permission Required",
                 "permissionText": "We need access to your photo library to upload images.",
                 "uploadFailed": "Failed to upload the photo. Please try again.",
-                "competition": "Competition"
+                "competition": "Competition",
+                "noPhotos": "No photos yet. Be the first to share!"
             },
             "review": {
                 "title": "Leave a Review",
@@ -127,6 +140,7 @@ const resources = {
                 "subtitle": "Apply for subsidised visits for those in need",
                 "fullName": "Full Name",
                 "phone": "Phone Number",
+                "fillNamePhone": "Please fill in your full name and phone number.",
                 "category": "Category",
                 "disability": "Person with Disability",
                 "patient": "Patient",
@@ -145,6 +159,29 @@ const resources = {
                 "success": "Application submitted successfully!",
                 "error": "Failed to submit application. Please try again.",
                 "loginRequired": "Please log in to apply."
+            },
+            "app": {
+                "joinCommunity": "Join the ToursticDZ community",
+                "fullName": "Full Name"
+            },
+            "profile": {
+                "welcome": "Welcome to",
+                "guestSubtitle": "Join us to save your favorite places and register for unique events in Biskra.",
+                "generalSettings": "General Settings",
+                "aboutProject": "About the Project",
+                "aboutProjectDesc": "Smart tourism platform for Biskra, Algeria.",
+                "comingSoon": "Coming soon",
+                "language": "Language",
+                "myActivity": "My Activity",
+                "myFavorites": "My Favorites",
+                "myEvents": "My Registered Events",
+                "myReviews": "My Reviews",
+                "accountSettings": "Account Settings",
+                "personalInfo": "Personal Info",
+                "privacySecurity": "Privacy & Security",
+                "favorites": "Favorites",
+                "events": "Events",
+                "reviews": "Reviews"
             },
             "accommodationTypes": {
                 "hotel": "Hotel",
@@ -233,7 +270,19 @@ const resources = {
                 "scanned": "Code QR Scanné"
             },
             "auth": {
-                "loginRequired": "Connexion requise"
+                "loginRequired": "Connexion requise",
+                "fillAllFields": "Veuillez remplir tous les champs",
+                "invalidEmail": "Veuillez entrer une adresse e-mail valide",
+                "passwordMinLength": "Le mot de passe doit contenir au moins 6 caractères",
+                "loginFailed": "Échec de connexion",
+                "signupFailed": "Échec de l'inscription",
+                "signupSuccess": "Compte créé ! Veuillez vérifier votre e-mail.",
+                "resetPassword": "Réinitialiser le mot de passe",
+                "resetPrompt": "Entrez votre adresse e-mail ci-dessus, puis appuyez sur Mot de passe oublié.",
+                "resetConfirm": "Un lien de réinitialisation sera envoyé à {{email}}",
+                "emailSent": "E-mail envoyé",
+                "resetEmailSent": "Consultez votre boîte de réception pour le lien de réinitialisation.",
+                "send": "Envoyer"
             },
             "common": {
                 "error": "Erreur",
@@ -268,7 +317,8 @@ const resources = {
                 "permissionRequired": "Permission de bibliothèque requise",
                 "permissionText": "Nous avons besoin d'accéder à votre photothèque.",
                 "uploadFailed": "Échec du téléchargement. Veuillez réessayer.",
-                "competition": "Compétition"
+                "competition": "Compétition",
+                "noPhotos": "Pas encore de photos. Soyez le premier à partager !"
             },
             "review": {
                 "title": "Laisser un avis",
@@ -282,6 +332,7 @@ const resources = {
                 "subtitle": "Demandez des visites subventionnées pour les personnes dans le besoin",
                 "fullName": "Nom complet",
                 "phone": "Numéro de téléphone",
+                "fillNamePhone": "Veuillez remplir votre nom complet et numéro de téléphone.",
                 "category": "Catégorie",
                 "disability": "Personne handicapée",
                 "patient": "Patient",
@@ -300,6 +351,29 @@ const resources = {
                 "success": "Demande soumise avec succès !",
                 "error": "Échec de la soumission. Veuillez réessayer.",
                 "loginRequired": "Connectez-vous pour postuler."
+            },
+            "app": {
+                "joinCommunity": "Rejoignez la communauté ToursticDZ",
+                "fullName": "Nom complet"
+            },
+            "profile": {
+                "welcome": "Bienvenue sur",
+                "guestSubtitle": "Rejoignez-nous pour sauvegarder vos lieux préférés et vous inscrire à des événements uniques à Biskra.",
+                "generalSettings": "Paramètres généraux",
+                "aboutProject": "À propos du projet",
+                "aboutProjectDesc": "Plateforme touristique intelligente pour Biskra, Algérie.",
+                "comingSoon": "Bientôt disponible",
+                "language": "Langue",
+                "myActivity": "Mon activité",
+                "myFavorites": "Mes favoris",
+                "myEvents": "Mes événements inscrits",
+                "myReviews": "Mes avis",
+                "accountSettings": "Paramètres du compte",
+                "personalInfo": "Informations personnelles",
+                "privacySecurity": "Confidentialité et sécurité",
+                "favorites": "Favoris",
+                "events": "Événements",
+                "reviews": "Avis"
             },
             "accommodationTypes": {
                 "hotel": "Hôtel",
@@ -388,7 +462,19 @@ const resources = {
                 "scanned": "تم مسح الرمز"
             },
             "auth": {
-                "loginRequired": "تسجيل الدخول مطلوب"
+                "loginRequired": "تسجيل الدخول مطلوب",
+                "fillAllFields": "يرجى ملء جميع الحقول",
+                "invalidEmail": "يرجى إدخال عنوان بريد إلكتروني صالح",
+                "passwordMinLength": "يجب أن تكون كلمة المرور 6 أحرف على الأقل",
+                "loginFailed": "فشل تسجيل الدخول",
+                "signupFailed": "فشل إنشاء الحساب",
+                "signupSuccess": "تم إنشاء الحساب! يرجى التحقق من بريدك الإلكتروني.",
+                "resetPassword": "إعادة تعيين كلمة المرور",
+                "resetPrompt": "أدخل بريدك الإلكتروني أعلاه، ثم اضغط على نسيت كلمة المرور.",
+                "resetConfirm": "سيتم إرسال رابط إعادة التعيين إلى {{email}}",
+                "emailSent": "تم إرسال البريد",
+                "resetEmailSent": "تحقق من صندوق الوارد لرابط إعادة التعيين.",
+                "send": "إرسال"
             },
             "common": {
                 "error": "خطأ",
@@ -423,7 +509,8 @@ const resources = {
                 "permissionRequired": "مطلوب إذن مكتبة الصور",
                 "permissionText": "نحتاج للوصول إلى مكتبة صورك لتحميل الصور.",
                 "uploadFailed": "فشل تحميل الصورة. يرجى المحاولة مرة أخرى.",
-                "competition": "مسابقة"
+                "competition": "مسابقة",
+                "noPhotos": "لا توجد صور بعد. كن أول من يشارك!"
             },
             "review": {
                 "title": "اترك تقييمًا",
@@ -437,6 +524,7 @@ const resources = {
                 "subtitle": "تقدم بطلب لزيارات مدعومة للمحتاجين",
                 "fullName": "الاسم الكامل",
                 "phone": "رقم الهاتف",
+                "fillNamePhone": "يرجى ملء الاسم الكامل ورقم الهاتف.",
                 "category": "الفئة",
                 "disability": "شخص ذو إعاقة",
                 "patient": "مريض",
@@ -455,6 +543,29 @@ const resources = {
                 "success": "تم تقديم الطلب بنجاح!",
                 "error": "فشل تقديم الطلب. يرجى المحاولة مرة أخرى.",
                 "loginRequired": "سجّل الدخول للتقديم."
+            },
+            "app": {
+                "joinCommunity": "انضم إلى مجتمع ToursticDZ",
+                "fullName": "الاسم الكامل"
+            },
+            "profile": {
+                "welcome": "مرحبًا بك في",
+                "guestSubtitle": "انضم إلينا لحفظ أماكنك المفضلة والتسجيل في فعاليات فريدة في بسكرة.",
+                "generalSettings": "الإعدادات العامة",
+                "aboutProject": "حول المشروع",
+                "aboutProjectDesc": "منصة سياحية ذكية لبسكرة، الجزائر.",
+                "comingSoon": "قريبًا",
+                "language": "اللغة",
+                "myActivity": "نشاطي",
+                "myFavorites": "مفضلاتي",
+                "myEvents": "فعالياتي المسجلة",
+                "myReviews": "تقييماتي",
+                "accountSettings": "إعدادات الحساب",
+                "personalInfo": "المعلومات الشخصية",
+                "privacySecurity": "الخصوصية والأمان",
+                "favorites": "المفضلات",
+                "events": "الفعاليات",
+                "reviews": "التقييمات"
             },
             "accommodationTypes": {
                 "hotel": "فندق",

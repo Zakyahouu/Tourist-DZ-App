@@ -27,12 +27,12 @@ export default function LoginScreen() {
     const handleLogin = async () => {
         const trimmedEmail = email.trim();
         if (!trimmedEmail || !password) {
-            Alert.alert('Error', 'Please fill in all fields');
+            Alert.alert(t('common.error'), t('auth.fillAllFields'));
             return;
         }
         // Basic email format validation
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
-            Alert.alert('Error', 'Please enter a valid email address');
+            Alert.alert(t('common.error'), t('auth.invalidEmail'));
             return;
         }
 
@@ -45,7 +45,7 @@ export default function LoginScreen() {
         });
 
         if (error) {
-            Alert.alert('Login Failed', error.message);
+            Alert.alert(t('auth.loginFailed'), error.message);
             setLoading(false);
         } else {
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -56,22 +56,22 @@ export default function LoginScreen() {
     const handleForgotPassword = () => {
         const trimmedEmail = email.trim();
         if (!trimmedEmail) {
-            Alert.alert('Reset Password', 'Enter your email address above first, then tap Forgot Password.');
+            Alert.alert(t('auth.resetPassword'), t('auth.resetPrompt'));
             return;
         }
         Alert.alert(
-            'Reset Password',
-            `A reset link will be sent to ${trimmedEmail}`,
+            t('auth.resetPassword'),
+            t('auth.resetConfirm', { email: trimmedEmail }),
             [
-                { text: 'Cancel', style: 'cancel' },
+                { text: t('common.cancel'), style: 'cancel' },
                 {
-                    text: 'Send',
+                    text: t('auth.send'),
                     onPress: async () => {
                         const { error } = await supabase.auth.resetPasswordForEmail(trimmedEmail);
                         if (error) {
-                            Alert.alert('Error', error.message);
+                            Alert.alert(t('common.error'), error.message);
                         } else {
-                            Alert.alert('Email Sent', 'Check your inbox for the password reset link.');
+                            Alert.alert(t('auth.emailSent'), t('auth.resetEmailSent'));
                         }
                     }
                 }
@@ -138,7 +138,7 @@ export default function LoginScreen() {
 
                 <View style={styles.footer}>
                     <Text style={styles.footerText}>{t('app.dontHaveAccount')} </Text>
-                    <TouchableOpacity onPress={() => router.push('/signup')}>
+                    <TouchableOpacity onPress={() => router.push('/(auth)/signup')}>
                         <Text style={styles.signupText}>{t('app.signup')}</Text>
                     </TouchableOpacity>
                 </View>

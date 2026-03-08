@@ -45,7 +45,7 @@ export default function SolidarityScreen() {
 
     const handleSubmit = async () => {
         if (!fullName.trim() || !phone.trim()) {
-            Alert.alert(t('common.error'), 'Please fill in your full name and phone number.');
+            Alert.alert(t('common.error'), t('solidarity.fillNamePhone'));
             return;
         }
         if (preferredTripTypes.length === 0) {

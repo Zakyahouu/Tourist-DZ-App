@@ -178,6 +178,9 @@ export default function EventsScreen() {
                     keyExtractor={(item) => item.id}
                     contentContainerStyle={styles.listContent}
                     showsVerticalScrollIndicator={false}
+                    removeClippedSubviews
+                    maxToRenderPerBatch={10}
+                    windowSize={5}
                 />
             )}
         </View>

@@ -224,7 +224,7 @@ export default function GalleryScreen() {
                 <View style={styles.emptyState}>
                     <Camera size={48} stroke="#cbd5e1" />
                     <Text style={styles.emptyTitle}>{t('nav.gallery')}</Text>
-                    <Text style={styles.emptySubtitle}>No photos yet. Be the first to share!</Text>
+                    <Text style={styles.emptySubtitle}>{t('gallery.noPhotos')}</Text>
                 </View>
             ) : (
                 <FlatList
@@ -235,6 +235,9 @@ export default function GalleryScreen() {
                     contentContainerStyle={styles.listContent}
                     columnWrapperStyle={styles.columnWrapper}
                     showsVerticalScrollIndicator={false}
+                    removeClippedSubviews
+                    maxToRenderPerBatch={8}
+                    windowSize={5}
                 />
             )}
         </View>
