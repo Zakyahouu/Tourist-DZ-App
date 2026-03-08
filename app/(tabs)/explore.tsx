@@ -1,112 +1,176 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { StyleSheet, View, Text, TouchableOpacity, ScrollView, Dimensions } from 'react-native';
+import MapView, { Marker, Callout } from 'react-native-maps';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Colors } from '@/constants/theme';
+import { supabase } from '@/src/lib/supabase';
+import { MapPin, Navigation, Info, Camera } from 'lucide-react-native';
+import { useRouter } from 'expo-router';
+import { useTranslation } from 'react-i18next';
+import logger from '@/src/utils/logger';
 
-import { Collapsible } from '@/components/ui/collapsible';
-import { ExternalLink } from '@/components/external-link';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Fonts } from '@/constants/theme';
+const ExploreScreen = () => {
+    const insets = useSafeAreaInsets();
+    const router = useRouter();
+    const { t, i18n } = useTranslation();
+    const lang = i18n.language || 'fr';
+    const [sites, setSites] = useState<any[]>([]);
+    const [region, setRegion] = useState({
+        latitude: 34.8516,
+        longitude: 5.7281,
+        latitudeDelta: 0.1,
+        longitudeDelta: 0.1,
+    });
 
-export default function TabTwoScreen() {
-  return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
-      headerImage={
-        <IconSymbol
-          size={310}
-          color="#808080"
-          name="chevron.left.forwardslash.chevron.right"
-          style={styles.headerImage}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText
-          type="title"
-          style={{
-            fontFamily: Fonts.rounded,
-          }}>
-          Explore
-        </ThemedText>
-      </ThemedView>
-      <ThemedText>This app includes example code to help you get started.</ThemedText>
-      <Collapsible title="File-based routing">
-        <ThemedText>
-          This app has two screens:{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/explore.tsx</ThemedText>
-        </ThemedText>
-        <ThemedText>
-          The layout file in <ThemedText type="defaultSemiBold">app/(tabs)/_layout.tsx</ThemedText>{' '}
-          sets up the tab navigator.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/router/introduction">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Android, iOS, and web support">
-        <ThemedText>
-          You can open this project on Android, iOS, and the web. To open the web version, press{' '}
-          <ThemedText type="defaultSemiBold">w</ThemedText> in the terminal running this project.
-        </ThemedText>
-      </Collapsible>
-      <Collapsible title="Images">
-        <ThemedText>
-          For static images, you can use the <ThemedText type="defaultSemiBold">@2x</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">@3x</ThemedText> suffixes to provide files for
-          different screen densities
-        </ThemedText>
-        <Image
-          source={require('@/assets/images/react-logo.png')}
-          style={{ width: 100, height: 100, alignSelf: 'center' }}
-        />
-        <ExternalLink href="https://reactnative.dev/docs/images">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Light and dark mode components">
-        <ThemedText>
-          This template has light and dark mode support. The{' '}
-          <ThemedText type="defaultSemiBold">useColorScheme()</ThemedText> hook lets you inspect
-          what the user&apos;s current color scheme is, and so you can adjust UI colors accordingly.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/develop/user-interface/color-themes/">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Animations">
-        <ThemedText>
-          This template includes an example of an animated component. The{' '}
-          <ThemedText type="defaultSemiBold">components/HelloWave.tsx</ThemedText> component uses
-          the powerful{' '}
-          <ThemedText type="defaultSemiBold" style={{ fontFamily: Fonts.mono }}>
-            react-native-reanimated
-          </ThemedText>{' '}
-          library to create a waving hand animation.
-        </ThemedText>
-        {Platform.select({
-          ios: (
-            <ThemedText>
-              The <ThemedText type="defaultSemiBold">components/ParallaxScrollView.tsx</ThemedText>{' '}
-              component provides a parallax effect for the header image.
-            </ThemedText>
-          ),
-        })}
-      </Collapsible>
-    </ParallaxScrollView>
-  );
-}
+    useEffect(() => {
+        async function fetchSites() {
+            try {
+                const { data, error } = await supabase
+                    .from('tourist_sites')
+                    .select('*')
+                    .eq('is_active', true);
+                if (data) setSites(data);
+                if (error) logger.error('Error fetching sites:', error);
+            } catch (err) {
+                logger.error('Fetch error:', err);
+            }
+        }
+        fetchSites();
+    }, []);
+
+    return (
+        <View style={styles.container}>
+            <MapView
+                style={styles.map}
+                initialRegion={region}
+                onRegionChangeComplete={setRegion}
+            >
+                {sites.map((site) => (
+                    <Marker
+                        key={site.id}
+                        coordinate={{
+                            latitude: site.latitude || 34.85,
+                            longitude: site.longitude || 5.73,
+                        }}
+                        pinColor="#f97316"
+                        onPress={() => router.push(`/site/${site.id}`)}
+                        onCalloutPress={() => {
+                            router.push(`/site/${site.id}`);
+                        }}
+                    >
+                        <Callout
+                            tooltip={false}
+                            onPress={() => router.push(`/site/${site.id}`)}
+                        >
+                            <View style={styles.calloutContainer}>
+                                <Text style={styles.calloutTitle}>{site.name?.[lang] || site.name?.fr || 'Unknown Site'}</Text>
+                                <Text style={styles.calloutCategory}>{site.category.toUpperCase()}</Text>
+                                <Text style={styles.calloutHint}>{t('details.viewDetails')} →</Text>
+                            </View>
+                        </Callout>
+                    </Marker>
+                ))}
+            </MapView>
+
+            <View style={[styles.overlay, { top: insets.top + 20 }]}>
+                <View style={styles.searchBar}>
+                    <Text style={styles.searchText}>Search Biskra sites...</Text>
+                </View>
+            </View>
+
+            <View style={[styles.floatingActions, { bottom: 30 }]}>
+                <TouchableOpacity
+                    style={styles.actionBtn}
+                    onPress={() => router.push('/scanner')}
+                >
+                    <Camera size={24} color="white" />
+                </TouchableOpacity>
+                <TouchableOpacity
+                    style={styles.actionBtn}
+                    onPress={() => router.push('/explore')}
+                >
+                    <Navigation size={24} color="white" />
+                </TouchableOpacity>
+            </View>
+        </View>
+    );
+};
+
+export default ExploreScreen;
 
 const styles = StyleSheet.create({
-  headerImage: {
-    color: '#808080',
-    bottom: -90,
-    left: -35,
-    position: 'absolute',
-  },
-  titleContainer: {
-    flexDirection: 'row',
-    gap: 8,
-  },
+    container: {
+        flex: 1,
+    },
+    map: {
+        ...StyleSheet.absoluteFillObject,
+    },
+    overlay: {
+        position: 'absolute',
+        left: 20,
+        right: 20,
+    },
+    searchBar: {
+        backgroundColor: 'white',
+        height: 50,
+        borderRadius: 25,
+        paddingHorizontal: 20,
+        justifyContent: 'center',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.1,
+        shadowRadius: 10,
+        elevation: 5,
+    },
+    searchText: {
+        color: '#94a3b8',
+        fontWeight: '600',
+    },
+    floatingActions: {
+        position: 'absolute',
+        right: 20,
+        gap: 12,
+    },
+    actionBtn: {
+        width: 60,
+        height: 60,
+        borderRadius: 30,
+        backgroundColor: '#1e293b',
+        alignItems: 'center',
+        justifyContent: 'center',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.2,
+        shadowRadius: 10,
+        elevation: 8,
+    },
+    calloutContainer: {
+        backgroundColor: 'white',
+        padding: 16,
+        borderRadius: 20,
+        width: 200,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.1,
+        shadowRadius: 10,
+    },
+    calloutTitle: {
+        fontSize: 16,
+        fontWeight: '800',
+        color: '#1e293b',
+        marginBottom: 4,
+    },
+    calloutCategory: {
+        fontSize: 12,
+        fontWeight: '700',
+        color: '#f97316',
+        textTransform: 'uppercase',
+        marginBottom: 12,
+    },
+    calloutHint: {
+        fontSize: 12,
+        fontWeight: '800',
+        color: '#1e293b',
+        marginTop: 4,
+    },
 });
