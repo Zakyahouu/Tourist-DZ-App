@@ -19,7 +19,11 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "permissions": [
+        "android.permission.RECORD_AUDIO"
+      ],
+      "package": "com.boucettazakaria.touristdz"
     },
     "web": {
       "output": "static",
@@ -44,11 +48,19 @@
             "backgroundColor": "#000000"
           }
         }
-      ]
+      ],
+      "expo-localization",
+      "expo-secure-store"
     ],
     "experiments": {
       "typedRoutes": false,
       "reactCompiler": false
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "2e3e1640-26c3-422e-8c26-ae2d5256583a"
+      }
     }
   }
 }
