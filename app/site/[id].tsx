@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
     StyleSheet,
     View,
@@ -7,14 +7,12 @@ import {
     TouchableOpacity,
     ActivityIndicator,
     Linking,
-    Dimensions,
-    FlatList,
-    Alert
+    Alert,
+    TextInput
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { supabase } from '../../src/lib/supabase';
 import { useAuth } from '../../src/context/AuthContext';
-import { Colors } from '@/constants/theme';
 import { useTranslation } from 'react-i18next';
 import {
     ArrowLeft,
@@ -29,12 +27,9 @@ import {
 } from 'lucide-react-native';
 import { Image } from 'expo-image';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { BlurView } from 'expo-blur';
 import * as Haptics from 'expo-haptics';
 import * as Sharing from 'expo-sharing';
 import logger from '../../src/utils/logger';
-
-const { width } = Dimensions.get('window');
 
 export default function SiteDetailScreen() {
     const { id } = useLocalSearchParams();
@@ -48,15 +43,11 @@ export default function SiteDetailScreen() {
     const [loading, setLoading] = useState(true);
     const [isFavorite, setIsFavorite] = useState(false);
     const [favLoading, setFavLoading] = useState(false);
+    const [reviewRating, setReviewRating] = useState(5);
+    const [reviewText, setReviewText] = useState('');
+    const [submittingReview, setSubmittingReview] = useState(false);
 
-    useEffect(() => {
-        if (id) {
-            fetchSiteDetails();
-            if (user) checkFavorite();
-        }
-    }, [id, user]);
-
-    async function fetchSiteDetails() {
+    const fetchSiteDetails = useCallback(async () => {
         try {
             const { data, error } = await supabase
                 .from('tourist_sites')
@@ -71,18 +62,29 @@ export default function SiteDetailScreen() {
         } finally {
             setLoading(false);
         }
-    }
+    }, [id]);
 
-    async function checkFavorite() {
+    const checkFavorite = useCallback(async () => {
         if (!user || !id) return;
-        const { data } = await supabase
-            .from('favorites')
-            .select('id')
-            .eq('user_id', user.id)
-            .eq('site_id', id)
-            .single();
-        setIsFavorite(!!data);
-    }
+        try {
+            const { data } = await supabase
+                .from('favorites')
+                .select('id')
+                .eq('user_id', user.id)
+                .eq('site_id', id)
+                .single();
+            setIsFavorite(!!data);
+        } catch (err) {
+            logger.error('checkFavorite error:', err);
+        }
+    }, [id, user]);
+
+    useEffect(() => {
+        if (id) {
+            fetchSiteDetails();
+            if (user) checkFavorite();
+        }
+    }, [id, user, fetchSiteDetails, checkFavorite]);
 
     const toggleFavorite = async () => {
         if (!user) {
@@ -126,10 +128,36 @@ export default function SiteDetailScreen() {
         }
     };
 
+    const submitReview = async () => {
+        if (!user) {
+            Alert.alert(t('auth.loginRequired'), t('review.loginRequired'));
+            router.push('/(auth)/login');
+            return;
+        }
+        if (submittingReview) return;
+        setSubmittingReview(true);
+        try {
+            const { error } = await supabase.from('reviews').upsert(
+                { user_id: user.id, site_id: id, rating: reviewRating, comment: reviewText.trim() || null },
+                { onConflict: 'user_id,site_id' }
+            );
+            if (error) throw error;
+            Alert.alert(t('review.success'));
+            setReviewText('');
+            setReviewRating(5);
+            fetchSiteDetails(); // refresh reviews
+        } catch (err) {
+            logger.error('submitReview error:', err);
+            Alert.alert(t('common.error'), t('review.submitError'));
+        } finally {
+            setSubmittingReview(false);
+        }
+    };
+
     if (loading) {
         return (
             <View style={styles.loadingContainer}>
-                <ActivityIndicator size="large" color={Colors.light.tint} />
+                <ActivityIndicator size="large" color="#f97316" />
             </View>
         );
     }
@@ -311,6 +339,41 @@ export default function SiteDetailScreen() {
                         ) : (
                             <Text style={styles.noReviews}>{t('details.noReviews')}</Text>
                         )}
+
+                        <View style={styles.reviewForm}>
+                            <Text style={styles.reviewFormTitle}>{t('review.title')}</Text>
+                            <View style={styles.starsRow}>
+                                {[1, 2, 3, 4, 5].map(star => (
+                                    <TouchableOpacity key={star} onPress={() => setReviewRating(star)} hitSlop={{ top: 8, bottom: 8, left: 4, right: 4 }}>
+                                        <Star
+                                            size={28}
+                                            stroke={star <= reviewRating ? '#f59e0b' : '#cbd5e1'}
+                                            fill={star <= reviewRating ? '#f59e0b' : 'transparent'}
+                                        />
+                                    </TouchableOpacity>
+                                ))}
+                            </View>
+                            <TextInput
+                                style={styles.reviewInput}
+                                placeholder={t('review.placeholder')}
+                                value={reviewText}
+                                onChangeText={setReviewText}
+                                multiline
+                                numberOfLines={3}
+                                maxLength={500}
+                                textAlignVertical="top"
+                            />
+                            <TouchableOpacity
+                                style={[styles.reviewSubmitBtn, submittingReview && styles.disabledBtn]}
+                                onPress={submitReview}
+                                disabled={submittingReview}
+                            >
+                                {submittingReview
+                                    ? <ActivityIndicator size="small" color="white" />
+                                    : <Text style={styles.reviewSubmitText}>{t('common.submit')}</Text>
+                                }
+                            </TouchableOpacity>
+                        </View>
                     </View>
                 </View>
             </ScrollView>
@@ -629,5 +692,43 @@ const styles = StyleSheet.create({
         color: '#94a3b8',
         paddingVertical: 20,
         fontStyle: 'italic',
+    },
+    reviewForm: {
+        backgroundColor: 'white',
+        borderRadius: 20,
+        padding: 20,
+        marginTop: 16,
+        borderWidth: 1,
+        borderColor: '#f1f5f9',
+        gap: 12,
+    },
+    reviewFormTitle: {
+        fontSize: 16,
+        fontWeight: '800',
+        color: '#1e293b',
+    },
+    reviewInput: {
+        borderWidth: 1,
+        borderColor: '#e2e8f0',
+        borderRadius: 12,
+        padding: 12,
+        fontSize: 14,
+        color: '#1e293b',
+        minHeight: 80,
+    },
+    reviewSubmitBtn: {
+        backgroundColor: '#f97316',
+        height: 48,
+        borderRadius: 14,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    disabledBtn: {
+        opacity: 0.6,
+    },
+    reviewSubmitText: {
+        color: 'white',
+        fontWeight: '800',
+        fontSize: 15,
     },
 });

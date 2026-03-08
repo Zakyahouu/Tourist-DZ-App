@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, Dimensions, Alert } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { X, Zap, ZapOff, Info } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
+import { useTranslation } from 'react-i18next';
 
 const { width } = Dimensions.get('window');
 
@@ -14,6 +15,7 @@ export default function ScannerScreen() {
     const [torch, setTorch] = useState(false);
     const router = useRouter();
     const insets = useSafeAreaInsets();
+    const { t } = useTranslation();
 
     if (!permission) {
         // Camera permissions are still loading.
@@ -31,10 +33,10 @@ export default function ScannerScreen() {
                 </View>
                 <View style={styles.permissionContainer}>
                     <Info size={64} color="#64748b" style={{ marginBottom: 20 }} />
-                    <Text style={styles.permissionTitle}>Camera Permission Required</Text>
-                    <Text style={styles.permissionText}>We need access to your camera to scan QR codes at tourist sites.</Text>
+                    <Text style={styles.permissionTitle}>{t('scanner.permissionRequired')}</Text>
+                    <Text style={styles.permissionText}>{t('scanner.permissionText')}</Text>
                     <TouchableOpacity style={styles.btn} onPress={requestPermission}>
-                        <Text style={styles.btnText}>Grant Permission</Text>
+                        <Text style={styles.btnText}>{t('scanner.grantPermission')}</Text>
                     </TouchableOpacity>
                 </View>
             </View>
@@ -58,9 +60,9 @@ export default function ScannerScreen() {
             router.replace(`/event/${id}`);
         } else {
             Alert.alert(
-                "QR Code Scanned",
-                `Content: ${data}`,
-                [{ text: "OK", onPress: () => setScanned(false) }]
+                t('scanner.scanned'),
+                data,
+                [{ text: 'OK', onPress: () => setScanned(false) }]
             );
         }
     };
@@ -94,8 +96,8 @@ export default function ScannerScreen() {
                     </View>
 
                     <View style={styles.footer}>
-                        <Text style={styles.footerText}>Point your camera at a QR code</Text>
-                        <Text style={styles.footerSubText}>Available at monuments and sites across Biskra</Text>
+                        <Text style={styles.footerText}>{t('scanner.pointCamera')}</Text>
+                        <Text style={styles.footerSubText}>{t('scanner.siteHint')}</Text>
                     </View>
                 </View>
             </CameraView>

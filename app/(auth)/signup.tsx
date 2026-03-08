@@ -14,7 +14,7 @@ import {
 import { useRouter } from 'expo-router';
 import { supabase } from '../../src/lib/supabase';
 import { useTranslation } from 'react-i18next';
-import { Mail, Lock, User, ArrowRight, CheckCircle2 } from 'lucide-react-native';
+import { Mail, Lock, User, ArrowRight } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 
 export default function SignupScreen() {

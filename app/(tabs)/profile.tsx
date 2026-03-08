@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, ScrollView, Image, ActivityIndicator, Alert } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Colors } from '@/constants/theme';
 import { useAuth } from '@/src/context/AuthContext';
 import { User, Settings, Heart, Calendar, LogOut, ChevronRight, Share2, Shield, Star } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
@@ -9,20 +8,22 @@ import { useTranslation } from 'react-i18next';
 import { supabase } from '@/src/lib/supabase';
 import logger from '@/src/utils/logger';
 
+const LANGUAGES = [
+    { code: 'fr', label: 'Français' },
+    { code: 'en', label: 'English' },
+    { code: 'ar', label: 'العربية' },
+];
+
 export default function ProfileScreen() {
     const insets = useSafeAreaInsets();
     const router = useRouter();
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const { user, profile, signOut, loading } = useAuth();
     const isAdmin = profile?.role === 'admin';
 
     const [stats, setStats] = useState({ favorites: 0, events: 0, reviews: 0 });
 
-    useEffect(() => {
-        if (user) fetchStats();
-    }, [user]);
-
-    async function fetchStats() {
+    const fetchStats = useCallback(async () => {
         if (!user) return;
         try {
             const [favResult, evResult, revResult] = await Promise.all([
@@ -38,7 +39,11 @@ export default function ProfileScreen() {
         } catch (err) {
             logger.error('fetchStats error:', err);
         }
-    }
+    }, [user]);
+
+    useEffect(() => {
+        if (user) fetchStats();
+    }, [user, fetchStats]);
 
     const displayName = profile?.full_name || user?.email?.split('@')[0] || 'Traveler';
 
@@ -92,6 +97,23 @@ export default function ProfileScreen() {
                     <MenuItem icon={Share2} title="About the Project" color="#64748b" onPress={() => Alert.alert('ToursticDZ', 'Smart tourism platform for Biskra, Algeria.')} />
                 </View>
 
+                <View style={[styles.section, { paddingHorizontal: 20, paddingTop: 10 }]}>
+                    <Text style={styles.sectionTitle}>Language</Text>
+                    <View style={styles.langRow}>
+                        {LANGUAGES.map(lang => (
+                            <TouchableOpacity
+                                key={lang.code}
+                                style={[styles.langBtn, i18n.language === lang.code && styles.langBtnActive]}
+                                onPress={() => i18n.changeLanguage(lang.code)}
+                            >
+                                <Text style={[styles.langText, i18n.language === lang.code && styles.langTextActive]}>
+                                    {lang.label}
+                                </Text>
+                            </TouchableOpacity>
+                        ))}
+                    </View>
+                </View>
+
                 <Text style={styles.versionText}>Version 1.0.0 (Expo)</Text>
             </ScrollView>
         );
@@ -143,12 +165,30 @@ export default function ProfileScreen() {
                 <MenuItem icon={Heart} title="My Favorites" color="#ef4444" onPress={() => Alert.alert('Favorites', 'Coming soon')} />
                 <MenuItem icon={Calendar} title="My Registered Events" color="#3b82f6" onPress={() => Alert.alert('Events', 'Coming soon')} />
                 <MenuItem icon={Star} title="My Reviews" color="#f59e0b" onPress={() => Alert.alert('Reviews', 'Coming soon')} />
+                <MenuItem icon={Heart} title={t('solidarity.title')} color="#e11d48" onPress={() => router.push('/solidarity')} />
             </View>
 
             <View style={styles.section}>
                 <Text style={styles.sectionTitle}>Account Settings</Text>
                 <MenuItem icon={Settings} title="Personal Info" color="#64748b" onPress={() => Alert.alert('Personal Info', 'Coming soon')} />
                 <MenuItem icon={Shield} title="Privacy & Security" color="#64748b" onPress={() => Alert.alert('Privacy', 'Coming soon')} />
+            </View>
+
+            <View style={styles.section}>
+                <Text style={styles.sectionTitle}>Language</Text>
+                <View style={styles.langRow}>
+                    {LANGUAGES.map(lang => (
+                        <TouchableOpacity
+                            key={lang.code}
+                            style={[styles.langBtn, i18n.language === lang.code && styles.langBtnActive]}
+                            onPress={() => i18n.changeLanguage(lang.code)}
+                        >
+                            <Text style={[styles.langText, i18n.language === lang.code && styles.langTextActive]}>
+                                {lang.label}
+                            </Text>
+                        </TouchableOpacity>
+                    ))}
+                </View>
             </View>
 
             <TouchableOpacity style={styles.logoutBtn} onPress={signOut}>
@@ -395,5 +435,30 @@ const styles = StyleSheet.create({
     },
     guestMenu: {
         paddingHorizontal: 20,
+    },
+    langRow: {
+        flexDirection: 'row',
+        gap: 10,
+    },
+    langBtn: {
+        flex: 1,
+        paddingVertical: 12,
+        borderRadius: 14,
+        backgroundColor: 'white',
+        alignItems: 'center',
+        borderWidth: 1,
+        borderColor: '#e2e8f0',
+    },
+    langBtnActive: {
+        backgroundColor: '#1e293b',
+        borderColor: '#1e293b',
+    },
+    langText: {
+        fontSize: 13,
+        fontWeight: '700',
+        color: '#64748b',
+    },
+    langTextActive: {
+        color: 'white',
     },
 });

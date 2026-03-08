@@ -43,7 +43,8 @@ const resources = {
                 "rating": "Rating",
                 "getDirections": "Get Directions",
                 "noReviews": "No reviews yet.",
-                "viewDetails": "View Details"
+                "viewDetails": "View Details",
+                "description": "Description"
             },
             "categories": {
                 "all": "All",
@@ -57,6 +58,7 @@ const resources = {
                 "audioGuideTitle": "Interactive Audio Guide",
                 "audioGuideDesc": "Listen to the history and secrets narrated by our local guides.",
                 "listenNow": "Listen Now",
+                "play": "Play",
                 "qrTitle": "Smart Audio QR",
                 "qrDesc": "Scan the QR code at the entrance for a multi-lingual tour.",
                 "availableIn": "Available in"
@@ -64,6 +66,68 @@ const resources = {
             "accessibility": {
                 "accessible": "Wheelchair Accessible",
                 "limited": "Limited Access"
+            },
+            "scanner": {
+                "title": "QR Code Scanner",
+                "permissionRequired": "Camera Permission Required",
+                "permissionText": "We need access to your camera to scan QR codes at tourist sites.",
+                "grantPermission": "Grant Permission",
+                "pointCamera": "Point your camera at a QR code",
+                "siteHint": "Available at monuments and sites across Biskra",
+                "scanned": "QR Code Scanned"
+            },
+            "auth": {
+                "loginRequired": "Login Required"
+            },
+            "common": {
+                "error": "Error",
+                "cancel": "Cancel",
+                "submit": "Submit",
+                "submitting": "Submitting...",
+                "success": "Success",
+                "goBack": "Go Back",
+                "unknownError": "An unknown error occurred.",
+                "notSpecified": "Not specified"
+            },
+            "events": {
+                "seats": "seats",
+                "date": "Date",
+                "location": "Location",
+                "capacity": "Capacity",
+                "unlimited": "Unlimited",
+                "notFound": "Event not found",
+                "joinEvent": "Join this Event",
+                "alreadyRegistered": "Already Registered",
+                "registeredSuccess": "You are now registered for this event!",
+                "registrationError": "Registration Error"
+            },
+            "gallery": {
+                "loginToUpload": "You need to be logged in to upload photos.",
+                "permissionRequired": "Media Library Permission Required",
+                "permissionText": "We need access to your photo library to upload images.",
+                "uploadFailed": "Failed to upload the photo. Please try again."
+            },
+            "review": {
+                "title": "Leave a Review",
+                "placeholder": "Share your experience...",
+                "loginRequired": "Please log in to leave a review.",
+                "submitError": "Failed to submit review. Please try again.",
+                "success": "Review submitted!"
+            },
+            "solidarity": {
+                "title": "Solidarity Tourism",
+                "subtitle": "Apply for subsidised visits for those in need",
+                "fullName": "Full Name",
+                "phone": "Phone Number",
+                "category": "Category",
+                "disability": "Person with Disability",
+                "patient": "Patient",
+                "lowIncome": "Low Income",
+                "specialNeeds": "Special Needs (optional)",
+                "submit": "Submit Application",
+                "success": "Application submitted successfully!",
+                "error": "Failed to submit application. Please try again.",
+                "loginRequired": "Please log in to apply."
             }
         }
     },
@@ -107,7 +171,8 @@ const resources = {
                 "rating": "Note",
                 "getDirections": "Obtenir l'itinéraire",
                 "noReviews": "Aucun avis pour le moment.",
-                "viewDetails": "Voir les détails"
+                "viewDetails": "Voir les détails",
+                "description": "Description"
             },
             "categories": {
                 "all": "Tout",
@@ -121,6 +186,7 @@ const resources = {
                 "audioGuideTitle": "Guide Audio Interactif",
                 "audioGuideDesc": "Écoutez l'histoire et les secrets racontés par nos guides locaux.",
                 "listenNow": "Écouter maintenant",
+                "play": "Lire",
                 "qrTitle": "Code QR Intelligent",
                 "qrDesc": "Scannez le code QR à l'entrée pour une visite multilingue.",
                 "availableIn": "Disponible en"
@@ -128,6 +194,68 @@ const resources = {
             "accessibility": {
                 "accessible": "Accessible aux fauteuils",
                 "limited": "Accès limité"
+            },
+            "scanner": {
+                "title": "Scanner QR",
+                "permissionRequired": "Permission de caméra requise",
+                "permissionText": "Nous avons besoin d'accès à votre caméra pour scanner les codes QR.",
+                "grantPermission": "Autoriser",
+                "pointCamera": "Pointez votre caméra vers un code QR",
+                "siteHint": "Disponible aux monuments et sites de Biskra",
+                "scanned": "Code QR Scanné"
+            },
+            "auth": {
+                "loginRequired": "Connexion requise"
+            },
+            "common": {
+                "error": "Erreur",
+                "cancel": "Annuler",
+                "submit": "Envoyer",
+                "submitting": "Envoi en cours...",
+                "success": "Succès",
+                "goBack": "Retour",
+                "unknownError": "Une erreur inconnue est survenue.",
+                "notSpecified": "Non spécifié"
+            },
+            "events": {
+                "seats": "places",
+                "date": "Date",
+                "location": "Lieu",
+                "capacity": "Capacité",
+                "unlimited": "Illimité",
+                "notFound": "Événement non trouvé",
+                "joinEvent": "Rejoindre cet événement",
+                "alreadyRegistered": "Déjà inscrit",
+                "registeredSuccess": "Vous êtes maintenant inscrit à cet événement !",
+                "registrationError": "Erreur d'inscription"
+            },
+            "gallery": {
+                "loginToUpload": "Vous devez être connecté pour télécharger des photos.",
+                "permissionRequired": "Permission de bibliothèque requise",
+                "permissionText": "Nous avons besoin d'accéder à votre photothèque.",
+                "uploadFailed": "Échec du téléchargement. Veuillez réessayer."
+            },
+            "review": {
+                "title": "Laisser un avis",
+                "placeholder": "Partagez votre expérience...",
+                "loginRequired": "Connectez-vous pour laisser un avis.",
+                "submitError": "Échec de l'envoi. Veuillez réessayer.",
+                "success": "Avis soumis !"
+            },
+            "solidarity": {
+                "title": "Tourisme solidaire",
+                "subtitle": "Demandez des visites subventionnées pour les personnes dans le besoin",
+                "fullName": "Nom complet",
+                "phone": "Numéro de téléphone",
+                "category": "Catégorie",
+                "disability": "Personne handicapée",
+                "patient": "Patient",
+                "lowIncome": "Faible revenu",
+                "specialNeeds": "Besoins spéciaux (facultatif)",
+                "submit": "Soumettre la demande",
+                "success": "Demande soumise avec succès !",
+                "error": "Échec de la soumission. Veuillez réessayer.",
+                "loginRequired": "Connectez-vous pour postuler."
             }
         }
     },
@@ -171,7 +299,8 @@ const resources = {
                 "rating": "التقييم",
                 "getDirections": "الحصول على الاتجاهات",
                 "noReviews": "لا توجد مراجعات بعد.",
-                "viewDetails": "عرض التفاصيل"
+                "viewDetails": "عرض التفاصيل",
+                "description": "الوصف"
             },
             "categories": {
                 "all": "الكل",
@@ -185,6 +314,7 @@ const resources = {
                 "audioGuideTitle": "دليل صوتي تفاعلي",
                 "audioGuideDesc": "استمع إلى التاريخ والأسرار التي يرويها مرشدونا المحليون.",
                 "listenNow": "استمع الآن",
+                "play": "تشغيل",
                 "qrTitle": "رمز QR الذكي",
                 "qrDesc": "امسح رمز QR عند المدخل للحصول على جولة بعدة لغات.",
                 "availableIn": "متاح بـ"
@@ -192,6 +322,68 @@ const resources = {
             "accessibility": {
                 "accessible": "مناسب للكراسي المتحركة",
                 "limited": "وصول محدود"
+            },
+            "scanner": {
+                "title": "قارئ رمز QR",
+                "permissionRequired": "مطلوب إذن الكاميرا",
+                "permissionText": "نحتاج إلى الوصول إلى كاميرتك لمسح رموز QR في المواقع السياحية.",
+                "grantPermission": "منح الإذن",
+                "pointCamera": "وجّه كاميرتك نحو رمز QR",
+                "siteHint": "متاح في المعالم والمواقع في بسكرة",
+                "scanned": "تم مسح الرمز"
+            },
+            "auth": {
+                "loginRequired": "تسجيل الدخول مطلوب"
+            },
+            "common": {
+                "error": "خطأ",
+                "cancel": "إلغاء",
+                "submit": "إرسال",
+                "submitting": "جارٍ الإرسال...",
+                "success": "نجاح",
+                "goBack": "رجوع",
+                "unknownError": "حدث خطأ غير معروف.",
+                "notSpecified": "غير محدد"
+            },
+            "events": {
+                "seats": "مقاعد",
+                "date": "التاريخ",
+                "location": "الموقع",
+                "capacity": "السعة",
+                "unlimited": "غير محدود",
+                "notFound": "الفعالية غير موجودة",
+                "joinEvent": "انضم لهذه الفعالية",
+                "alreadyRegistered": "مسجل بالفعل",
+                "registeredSuccess": "تم تسجيلك في هذه الفعالية بنجاح!",
+                "registrationError": "خطأ في التسجيل"
+            },
+            "gallery": {
+                "loginToUpload": "يجب تسجيل الدخول لتحميل الصور.",
+                "permissionRequired": "مطلوب إذن مكتبة الصور",
+                "permissionText": "نحتاج للوصول إلى مكتبة صورك لتحميل الصور.",
+                "uploadFailed": "فشل تحميل الصورة. يرجى المحاولة مرة أخرى."
+            },
+            "review": {
+                "title": "اترك تقييمًا",
+                "placeholder": "شارك تجربتك...",
+                "loginRequired": "سجّل الدخول لترك تقييم.",
+                "submitError": "فشل إرسال التقييم. يرجى المحاولة مرة أخرى.",
+                "success": "تم إرسال التقييم!"
+            },
+            "solidarity": {
+                "title": "السياحة التضامنية",
+                "subtitle": "تقدم بطلب لزيارات مدعومة للمحتاجين",
+                "fullName": "الاسم الكامل",
+                "phone": "رقم الهاتف",
+                "category": "الفئة",
+                "disability": "شخص ذو إعاقة",
+                "patient": "مريض",
+                "lowIncome": "ذو دخل منخفض",
+                "specialNeeds": "احتياجات خاصة (اختياري)",
+                "submit": "تقديم الطلب",
+                "success": "تم تقديم الطلب بنجاح!",
+                "error": "فشل تقديم الطلب. يرجى المحاولة مرة أخرى.",
+                "loginRequired": "سجّل الدخول للتقديم."
             }
         }
     }

@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "mobile",
-    "slug": "mobile",
+    "name": "ToursticDZ",
+    "slug": "toursticdz",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "mobile",
+    "scheme": "toursticdz",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": false,
     "ios": {
@@ -27,6 +27,12 @@
     },
     "plugins": [
       "expo-router",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "ToursticDZ needs access to your photos to upload gallery images."
+        }
+      ],
       [
         "expo-splash-screen",
         {

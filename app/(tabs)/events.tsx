@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, Text, FlatList, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Colors } from '@/constants/theme';
 import { supabase } from '@/src/lib/supabase';
 import { Calendar, MapPin, Users, ChevronRight } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
@@ -52,7 +51,7 @@ export default function EventsScreen() {
                     <Text style={styles.dateDay}>{day}</Text>
                 </View>
                 <View style={styles.eventInfo}>
-                    <Text style={styles.eventCategory}>{item.type.toUpperCase()}</Text>
+                    <Text style={styles.eventCategory}>{(item.type || '').toUpperCase()}</Text>
                     <Text style={styles.eventTitle} numberOfLines={2}>{item.title?.[lang] || item.title?.fr}</Text>
                     <View style={styles.eventDetails}>
                         <View style={styles.detailItem}>
@@ -61,7 +60,7 @@ export default function EventsScreen() {
                         </View>
                         <View style={styles.detailItem}>
                             <Users size={14} stroke="#64748b" />
-                            <Text style={styles.detailText}>{item.max_participants || '∞'} seats</Text>
+                            <Text style={styles.detailText}>{item.max_participants || '∞'} {t('events.seats')}</Text>
                         </View>
                     </View>
                 </View>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
     StyleSheet,
     View,
@@ -7,21 +7,17 @@ import {
     TouchableOpacity,
     ActivityIndicator,
     Alert,
-    Dimensions,
     Linking
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { supabase } from '../../src/lib/supabase';
 import { useAuth } from '../../src/context/AuthContext';
-import { Colors } from '@/constants/theme';
 import { useTranslation } from 'react-i18next';
 import {
     ArrowLeft,
     MapPin,
     Users,
     Calendar,
-    Clock,
-    Info,
     CheckCircle2,
     Shield,
     QrCode,
@@ -46,14 +42,7 @@ export default function EventDetailScreen() {
     const [isRegistered, setIsRegistered] = useState(false);
     const [registering, setRegistering] = useState(false);
 
-    useEffect(() => {
-        if (id) {
-            fetchEventDetails();
-            checkRegistration();
-        }
-    }, [id, user]);
-
-    async function fetchEventDetails() {
+    const fetchEventDetails = useCallback(async () => {
         try {
             const { data, error } = await supabase
                 .from('events')
@@ -68,18 +57,29 @@ export default function EventDetailScreen() {
         } finally {
             setLoading(false);
         }
-    }
+    }, [id]);
 
-    async function checkRegistration() {
+    const checkRegistration = useCallback(async () => {
         if (!user || !id) return;
-        const { data } = await supabase
-            .from('event_registrations')
-            .select('id')
-            .eq('event_id', id)
-            .eq('user_id', user.id)
-            .single();
-        if (data) setIsRegistered(true);
-    }
+        try {
+            const { data } = await supabase
+                .from('event_registrations')
+                .select('id')
+                .eq('event_id', id)
+                .eq('user_id', user.id)
+                .single();
+            if (data) setIsRegistered(true);
+        } catch (err) {
+            logger.error('checkRegistration error:', err);
+        }
+    }, [id, user]);
+
+    useEffect(() => {
+        if (id) {
+            fetchEventDetails();
+            checkRegistration();
+        }
+    }, [id, user, fetchEventDetails, checkRegistration]);
 
     const handleRegister = async () => {
         if (!user) {
@@ -88,7 +88,7 @@ export default function EventDetailScreen() {
                 'You need to be logged in to register for events.',
                 [
                     { text: 'Cancel', style: 'cancel' },
-                    { text: 'Login', onPress: () => router.push('/login') }
+                    { text: 'Login', onPress: () => router.push('/(auth)/login') }
                 ]
             );
             return;
@@ -103,11 +103,11 @@ export default function EventDetailScreen() {
         });
 
         if (error) {
-            Alert.alert('Registration Error', error.message);
+            Alert.alert(t('events.registrationError'), error?.message || t('common.unknownError'));
         } else {
             setIsRegistered(true);
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-            Alert.alert('Success', 'You are now registered for this event!');
+            Alert.alert(t('common.success'), t('events.registeredSuccess'));
         }
         setRegistering(false);
     };
@@ -115,7 +115,7 @@ export default function EventDetailScreen() {
     if (loading) {
         return (
             <View style={styles.loadingContainer}>
-                <ActivityIndicator size="large" color={Colors.light.tint} />
+                <ActivityIndicator size="large" color="#f97316" />
             </View>
         );
     }
@@ -123,9 +123,9 @@ export default function EventDetailScreen() {
     if (!event) {
         return (
             <View style={styles.errorContainer}>
-                <Text style={styles.errorText}>Event not found</Text>
+                <Text style={styles.errorText}>{t('events.notFound')}</Text>
                 <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-                    <Text style={styles.backBtnText}>Go Back</Text>
+                    <Text style={styles.backBtnText}>{t('common.goBack')}</Text>
                 </TouchableOpacity>
             </View>
         );
@@ -161,7 +161,7 @@ export default function EventDetailScreen() {
                     <View style={styles.titleSection}>
                         <View style={styles.tagRow}>
                             <View style={styles.typeBadge}>
-                                <Text style={styles.typeText}>{event.type.toUpperCase()}</Text>
+                                <Text style={styles.typeText}>{(event.type || '').toUpperCase()}</Text>
                             </View>
                             {event.is_solidarity && (
                                 <View style={styles.solidarityBadge}>
@@ -179,7 +179,7 @@ export default function EventDetailScreen() {
                                 <Calendar size={20} stroke="#f97316" />
                             </View>
                             <View>
-                                <Text style={styles.infoLabel}>Date</Text>
+                                <Text style={styles.infoLabel}>{t('events.date')}</Text>
                                 <Text style={styles.infoValue}>{day} {month} {year}</Text>
                             </View>
                         </View>
@@ -189,8 +189,8 @@ export default function EventDetailScreen() {
                                 <MapPin size={20} stroke="#2563eb" />
                             </View>
                             <View>
-                                <Text style={styles.infoLabel}>Location</Text>
-                                <Text style={styles.infoValue}>{event.location}</Text>
+                                <Text style={styles.infoLabel}>{t('events.location')}</Text>
+                                <Text style={styles.infoValue}>{event.location || t('common.notSpecified')}</Text>
                             </View>
                         </View>
 
@@ -199,14 +199,14 @@ export default function EventDetailScreen() {
                                 <Users size={20} stroke="#16a34a" />
                             </View>
                             <View>
-                                <Text style={styles.infoLabel}>Capacity</Text>
-                                <Text style={styles.infoValue}>{event.max_participants || 'Unlimted'} seats</Text>
+                                <Text style={styles.infoLabel}>{t('events.capacity')}</Text>
+                                <Text style={styles.infoValue}>{event.max_participants || t('events.unlimited')} {t('events.seats')}</Text>
                             </View>
                         </View>
                     </View>
 
                     <View style={styles.section}>
-                        <Text style={styles.sectionTitle}>Description</Text>
+                        <Text style={styles.sectionTitle}>{t('details.description')}</Text>
                         <Text style={styles.description}>
                             {event.description?.[lang] || event.description?.fr}
                         </Text>
@@ -229,7 +229,7 @@ export default function EventDetailScreen() {
                                 onPress={() => Linking.openURL(event.audio_url)}
                             >
                                 <PlayCircle size={20} stroke="white" />
-                                <Text style={styles.playBtnText}>Play</Text>
+                                <Text style={styles.playBtnText}>{t('features.play')}</Text>
                             </TouchableOpacity>
                         </View>
                     )}
@@ -259,10 +259,10 @@ export default function EventDetailScreen() {
                             ) : isRegistered ? (
                                 <>
                                     <CheckCircle2 size={22} stroke="white" />
-                                    <Text style={styles.registerBtnText}>Already Registered</Text>
+                                    <Text style={styles.registerBtnText}>{t('events.alreadyRegistered')}</Text>
                                 </>
                             ) : (
-                                <Text style={styles.registerBtnText}>Join this Event</Text>
+                                <Text style={styles.registerBtnText}>{t('events.joinEvent')}</Text>
                             )}
                         </TouchableOpacity>
                     </View>

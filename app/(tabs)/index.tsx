@@ -3,7 +3,6 @@ import { StyleSheet, View, Text, ScrollView, TextInput, TouchableOpacity, ImageB
 import { Search, MapPin, Calendar, Heart, Camera } from 'lucide-react-native';
 import { StatusBar } from 'expo-status-bar';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Colors } from '@/constants/theme';
 import { supabase } from '@/src/lib/supabase';
 import { useTranslation } from 'react-i18next';
 import { useRouter } from 'expo-router';
@@ -25,14 +24,6 @@ export default function HomeScreen() {
     fetchFeatured();
   }, []);
 
-  useEffect(() => {
-    if (user) {
-      fetchFavorites();
-    } else {
-      setFavoriteIds(new Set());
-    }
-  }, [user]);
-
   async function fetchFeatured() {
     try {
       const { data, error } = await supabase
@@ -49,7 +40,7 @@ export default function HomeScreen() {
     }
   }
 
-  async function fetchFavorites() {
+  const fetchFavorites = useCallback(async () => {
     if (!user) return;
     try {
       const { data } = await supabase
@@ -60,7 +51,15 @@ export default function HomeScreen() {
     } catch (err) {
       logger.error('fetchFavorites exception:', err);
     }
-  }
+  }, [user]);
+
+  useEffect(() => {
+    if (user) {
+      fetchFavorites();
+    } else {
+      setFavoriteIds(new Set());
+    }
+  }, [user, fetchFavorites]);
 
   const toggleFavorite = useCallback(async (siteId: string) => {
     if (!user) {

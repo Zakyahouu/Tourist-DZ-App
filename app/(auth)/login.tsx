@@ -13,10 +13,8 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { supabase } from '../../src/lib/supabase';
-import { Colors } from '@/constants/theme';
 import { useTranslation } from 'react-i18next';
-import { Mail, Lock, ArrowRight, Github } from 'lucide-react-native';
-import { BlurView } from 'expo-blur';
+import { Mail, Lock, ArrowRight } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 
 export default function LoginScreen() {

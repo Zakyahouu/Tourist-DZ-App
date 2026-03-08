@@ -1,10 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, ScrollView, Dimensions } from 'react-native';
+import React, { useState, useEffect, useMemo } from 'react';
+import { StyleSheet, View, Text, TouchableOpacity, TextInput } from 'react-native';
 import MapView, { Marker, Callout } from 'react-native-maps';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Colors } from '@/constants/theme';
 import { supabase } from '@/src/lib/supabase';
-import { MapPin, Navigation, Info, Camera } from 'lucide-react-native';
+import { Navigation, Search, Camera } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import logger from '@/src/utils/logger';
@@ -15,6 +14,7 @@ const ExploreScreen = () => {
     const { t, i18n } = useTranslation();
     const lang = i18n.language || 'fr';
     const [sites, setSites] = useState<any[]>([]);
+    const [searchQuery, setSearchQuery] = useState('');
     const [region, setRegion] = useState({
         latitude: 34.8516,
         longitude: 5.7281,
@@ -38,6 +38,15 @@ const ExploreScreen = () => {
         fetchSites();
     }, []);
 
+    const filteredSites = useMemo(() => {
+        if (!searchQuery.trim()) return sites;
+        const q = searchQuery.toLowerCase();
+        return sites.filter(s => {
+            const name = (s.name?.[lang] || s.name?.fr || '').toLowerCase();
+            return name.includes(q);
+        });
+    }, [sites, searchQuery, lang]);
+
     return (
         <View style={styles.container}>
             <MapView
@@ -45,7 +54,7 @@ const ExploreScreen = () => {
                 initialRegion={region}
                 onRegionChangeComplete={setRegion}
             >
-                {sites.map((site) => (
+                {filteredSites.map((site) => (
                     <Marker
                         key={site.id}
                         coordinate={{
@@ -64,7 +73,7 @@ const ExploreScreen = () => {
                         >
                             <View style={styles.calloutContainer}>
                                 <Text style={styles.calloutTitle}>{site.name?.[lang] || site.name?.fr || 'Unknown Site'}</Text>
-                                <Text style={styles.calloutCategory}>{site.category.toUpperCase()}</Text>
+                                <Text style={styles.calloutCategory}>{(site.category || '').toUpperCase()}</Text>
                                 <Text style={styles.calloutHint}>{t('details.viewDetails')} →</Text>
                             </View>
                         </Callout>
@@ -74,7 +83,14 @@ const ExploreScreen = () => {
 
             <View style={[styles.overlay, { top: insets.top + 20 }]}>
                 <View style={styles.searchBar}>
-                    <Text style={styles.searchText}>Search Biskra sites...</Text>
+                    <Search size={16} stroke="#94a3b8" style={{ marginRight: 8 }} />
+                    <TextInput
+                        style={styles.searchInput}
+                        placeholder={t('home.searchPlaceholder')}
+                        placeholderTextColor="#94a3b8"
+                        value={searchQuery}
+                        onChangeText={setSearchQuery}
+                    />
                 </View>
             </View>
 
@@ -115,16 +131,19 @@ const styles = StyleSheet.create({
         height: 50,
         borderRadius: 25,
         paddingHorizontal: 20,
-        justifyContent: 'center',
+        flexDirection: 'row',
+        alignItems: 'center',
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.1,
         shadowRadius: 10,
         elevation: 5,
     },
-    searchText: {
-        color: '#94a3b8',
+    searchInput: {
+        flex: 1,
+        fontSize: 14,
         fontWeight: '600',
+        color: '#1e293b',
     },
     floatingActions: {
         position: 'absolute',

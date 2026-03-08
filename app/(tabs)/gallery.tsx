@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { StyleSheet, View, Text, FlatList, TouchableOpacity, Image, Dimensions, Alert, ActivityIndicator } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Colors } from '@/constants/theme';
 import { supabase } from '@/src/lib/supabase';
 import { Heart, Plus, Camera } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/src/context/AuthContext';
 import logger from '@/src/utils/logger';
+import * as ImagePicker from 'expo-image-picker';
 
 const { width } = Dimensions.get('window');
 const columnWidth = (width - 60) / 2;
@@ -18,6 +18,7 @@ export default function GalleryScreen() {
     const [galleryItems, setGalleryItems] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [likedIds, setLikedIds] = useState<Set<string>>(new Set());
+    const [uploading, setUploading] = useState(false);
 
     useEffect(() => {
         async function fetchGallery() {
@@ -37,12 +38,54 @@ export default function GalleryScreen() {
         fetchGallery();
     }, []);
 
-    const handleUpload = () => {
+    const handleUpload = async () => {
         if (!user) {
-            Alert.alert(t('app.login'), 'You need to be logged in to upload photos.');
+            Alert.alert(t('auth.loginRequired'), t('gallery.loginToUpload'));
             return;
         }
-        Alert.alert('Coming Soon', 'Photo upload feature is coming soon to the mobile app!');
+        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (status !== 'granted') {
+            Alert.alert(t('gallery.permissionRequired'), t('gallery.permissionText'));
+            return;
+        }
+        const result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            quality: 0.7,
+            allowsEditing: true,
+            aspect: [4, 3],
+        });
+        if (result.canceled || !result.assets?.[0]) return;
+        setUploading(true);
+        try {
+            const asset = result.assets[0];
+            const ext = asset.uri.split('.').pop() ?? 'jpg';
+            const fileName = `gallery/${user.id}/${Date.now()}.${ext}`;
+            const response = await fetch(asset.uri);
+            const blob = await response.blob();
+            const arrayBuffer = await new Promise<ArrayBuffer>((res, rej) => {
+                const reader = new FileReader();
+                reader.onload = () => res(reader.result as ArrayBuffer);
+                reader.onerror = rej;
+                reader.readAsArrayBuffer(blob);
+            });
+            const { error: uploadError } = await supabase.storage
+                .from('gallery')
+                .upload(fileName, arrayBuffer, { contentType: blob.type || `image/${ext}` });
+            if (uploadError) throw uploadError;
+            const { data: urlData } = supabase.storage.from('gallery').getPublicUrl(fileName);
+            const { data: inserted, error: insertError } = await supabase
+                .from('gallery')
+                .insert({ user_id: user.id, image_url: urlData.publicUrl, likes_count: 0 })
+                .select()
+                .single();
+            if (insertError) throw insertError;
+            setGalleryItems(prev => [inserted, ...prev]);
+        } catch (err) {
+            logger.error('Upload error:', err);
+            Alert.alert(t('common.error'), t('gallery.uploadFailed'));
+        } finally {
+            setUploading(false);
+        }
     };
 
     const toggleLike = useCallback(async (item: any) => {
@@ -103,8 +146,11 @@ export default function GalleryScreen() {
         <View style={[styles.container, { paddingTop: insets.top }]}>
             <View style={styles.header}>
                 <Text style={styles.title}>{t('nav.gallery')}</Text>
-                <TouchableOpacity style={styles.uploadBtn} onPress={handleUpload}>
-                    <Plus size={24} stroke="white" />
+                <TouchableOpacity style={styles.uploadBtn} onPress={handleUpload} disabled={uploading}>
+                    {uploading
+                        ? <ActivityIndicator size="small" color="white" />
+                        : <Plus size={24} stroke="white" />
+                    }
                 </TouchableOpacity>
             </View>
 

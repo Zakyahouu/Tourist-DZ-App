@@ -4,13 +4,12 @@ import { StatusBar } from 'expo-status-bar';
 import 'react-native-reanimated';
 
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { AuthProvider } from '../src/context/AuthContext';
+import '../src/i18n';
 
 export const unstable_settings = {
   anchor: '(tabs)',
 };
-
-import { AuthProvider } from '../src/context/AuthContext';
-import '../src/i18n';
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
@@ -24,6 +23,7 @@ export default function RootLayout() {
           <Stack.Screen name="site/[id]" options={{ headerShown: false }} />
           <Stack.Screen name="event/[id]" options={{ headerShown: false }} />
           <Stack.Screen name="scanner" options={{ headerShown: false, presentation: 'fullScreenModal' }} />
+          <Stack.Screen name="solidarity" options={{ headerShown: false }} />
           <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
         </Stack>
         <StatusBar style="auto" />
