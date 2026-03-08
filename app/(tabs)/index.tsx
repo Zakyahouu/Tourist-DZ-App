@@ -136,7 +136,7 @@ export default function HomeScreen() {
         <View style={styles.heroContent}>
           <View style={styles.heroRow}>
             <View style={styles.badge}>
-              <Text style={styles.badgeText}>{t('app.tagline').toUpperCase()}</Text>
+              <Text style={styles.badgeText}>{t('Make Sure To Discover Algeria Fully').toUpperCase()}</Text>
             </View>
             <TouchableOpacity
               style={styles.scanBtn}
@@ -146,7 +146,7 @@ export default function HomeScreen() {
             </TouchableOpacity>
           </View>
 
-          <Text style={styles.heroTitle}>{t('app.title')} {"\n"}<Text style={styles.accentText}>Biskra</Text></Text>
+          <Text style={styles.heroTitle}>{t('Tourist DZ')} {"\n"}<Text style={styles.accentText}>Biskra</Text></Text>
 
           <View style={styles.searchContainer}>
             <Search size={20} stroke="#64748b" style={styles.searchIcon} />
