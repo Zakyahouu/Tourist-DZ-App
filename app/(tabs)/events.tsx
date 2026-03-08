@@ -149,7 +149,7 @@ export default function EventsScreen() {
             </View>
 
             {/* Category Filter */}
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterRow}>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ flexGrow: 0 }} contentContainerStyle={styles.filterRow}>
                 {EVENT_CATEGORIES.map(cat => (
                     <TouchableOpacity
                         key={cat.id}
@@ -229,6 +229,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20,
         paddingVertical: 8,
         gap: 6,
+        alignItems: 'center',
     },
     filterChip: {
         paddingHorizontal: 14,
