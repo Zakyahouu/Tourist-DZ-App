@@ -6,7 +6,7 @@ const resources = {
     en: {
         translation: {
             "app": {
-                "title": "ToursticDZ",
+                "title": "TouristDZ",
                 "tagline": "Discover Biskra",
                 "login": "Login",
                 "signup": "Sign Up",
@@ -161,7 +161,7 @@ const resources = {
                 "loginRequired": "Please log in to apply."
             },
             "app": {
-                "joinCommunity": "Join the ToursticDZ community",
+                "joinCommunity": "Join the TouristDZ community",
                 "fullName": "Full Name"
             },
             "profile": {
@@ -198,7 +198,7 @@ const resources = {
     fr: {
         translation: {
             "app": {
-                "title": "ToursticDZ",
+                "title": "TouristDZ",
                 "tagline": "Découvrez Biskra",
                 "login": "Connexion",
                 "signup": "S'inscrire",
@@ -353,7 +353,7 @@ const resources = {
                 "loginRequired": "Connectez-vous pour postuler."
             },
             "app": {
-                "joinCommunity": "Rejoignez la communauté ToursticDZ",
+                "joinCommunity": "Rejoignez la communauté TouristDZ",
                 "fullName": "Nom complet"
             },
             "profile": {
@@ -390,7 +390,7 @@ const resources = {
     ar: {
         translation: {
             "app": {
-                "title": "ToursticDZ",
+                "title": "TouristDZ",
                 "tagline": "اكتشف بسكرة",
                 "login": "تسجيل الدخول",
                 "signup": "إنشاء حساب",
@@ -545,7 +545,7 @@ const resources = {
                 "loginRequired": "سجّل الدخول للتقديم."
             },
             "app": {
-                "joinCommunity": "انضم إلى مجتمع ToursticDZ",
+                "joinCommunity": "انضم إلى مجتمع TouristDZ",
                 "fullName": "الاسم الكامل"
             },
             "profile": {

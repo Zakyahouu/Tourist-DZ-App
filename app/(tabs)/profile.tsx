@@ -94,7 +94,7 @@ export default function ProfileScreen() {
 
                 <View style={styles.guestMenu}>
                     <MenuItem icon={Settings} title={t('profile.generalSettings')} color="#64748b" onPress={() => Alert.alert(t('profile.generalSettings'), t('profile.comingSoon'))} />
-                    <MenuItem icon={Share2} title={t('profile.aboutProject')} color="#64748b" onPress={() => Alert.alert('ToursticDZ', t('profile.aboutProjectDesc'))} />
+                    <MenuItem icon={Share2} title={t('profile.aboutProject')} color="#64748b" onPress={() => Alert.alert('TouristDZ', t('profile.aboutProjectDesc'))} />
                 </View>
 
                 <View style={[styles.section, { paddingHorizontal: 20, paddingTop: 10 }]}>

@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "ToursticDZ",
-    "slug": "toursticdz",
+    "name": "TouristDZ",
+    "slug": "touristdz",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "toursticdz",
+    "scheme": "touristdz",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": false,
     "ios": {
@@ -30,7 +30,7 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "ToursticDZ needs access to your photos to upload gallery images."
+          "photosPermission": "TouristDZ needs access to your photos to upload gallery images."
         }
       ],
       [

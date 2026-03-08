@@ -49,7 +49,7 @@ export default function ScannerScreen() {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
 
         // Logic to handle different QR types
-        // Example: https://toursticdz.com/site/ID
+        // Example: https://touristdz.com/site/ID
         if (data.includes('site/')) {
             const parts = data.split('site/');
             const id = parts[parts.length - 1];
