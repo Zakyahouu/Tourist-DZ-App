@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, Text, FlatList, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { StyleSheet, View, Text, FlatList, TouchableOpacity, ActivityIndicator, ImageBackground } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { supabase } from '@/src/lib/supabase';
-import { Calendar, MapPin, Users, ChevronRight } from 'lucide-react-native';
+import { Calendar, MapPin, Users } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import logger from '@/src/utils/logger';
@@ -39,17 +39,25 @@ export default function EventsScreen() {
         const date = new Date(item.start_date);
         const day = date.getDate();
         const month = date.toLocaleString(lang, { month: 'short' });
+        const imageUrl = item.image_url || 'https://images.unsplash.com/photo-1549487535-61df1f822aa7?auto=format&fit=crop&q=80&w=800';
 
         return (
             <TouchableOpacity
                 style={styles.eventCard}
                 onPress={() => router.push(`/event/${item.id}`)}
-                activeOpacity={0.8}
+                activeOpacity={0.9}
             >
-                <View style={styles.dateBlock}>
-                    <Text style={styles.dateMonth}>{month}</Text>
-                    <Text style={styles.dateDay}>{day}</Text>
-                </View>
+                <ImageBackground
+                    source={{ uri: imageUrl }}
+                    style={styles.eventImage}
+                    imageStyle={styles.eventImageInner}
+                >
+                    <View style={styles.imageOverlay} />
+                    <View style={styles.dateBadge}>
+                        <Text style={styles.dateMonth}>{month}</Text>
+                        <Text style={styles.dateDay}>{day}</Text>
+                    </View>
+                </ImageBackground>
                 <View style={styles.eventInfo}>
                     <Text style={styles.eventCategory}>{(item.type || '').toUpperCase()}</Text>
                     <Text style={styles.eventTitle} numberOfLines={2}>{item.title?.[lang] || item.title?.fr}</Text>
@@ -64,7 +72,6 @@ export default function EventsScreen() {
                         </View>
                     </View>
                 </View>
-                <ChevronRight size={20} color="#cbd5e1" />
             </TouchableOpacity>
         );
     };
@@ -122,27 +129,45 @@ const styles = StyleSheet.create({
         paddingBottom: 40,
     },
     eventCard: {
-        flexDirection: 'row',
-        alignItems: 'center',
         backgroundColor: 'white',
         borderRadius: 24,
-        padding: 16,
         marginBottom: 16,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.05,
         shadowRadius: 10,
         elevation: 3,
+        overflow: 'hidden',
     },
-    dateBlock: {
-        width: 60,
-        height: 70,
-        backgroundColor: '#f1f5f9',
-        borderRadius: 16,
+    eventImage: {
+        height: 160,
+        width: '100%',
+        justifyContent: 'flex-end',
+        alignItems: 'flex-start',
+        padding: 12,
+    },
+    eventImageInner: {
+        borderTopLeftRadius: 24,
+        borderTopRightRadius: 24,
+    },
+    imageOverlay: {
+        ...StyleSheet.absoluteFillObject,
+        backgroundColor: 'rgba(0,0,0,0.15)',
+        borderTopLeftRadius: 24,
+        borderTopRightRadius: 24,
+    },
+    dateBadge: {
+        backgroundColor: 'white',
+        borderRadius: 14,
+        width: 56,
+        height: 60,
         alignItems: 'center',
         justifyContent: 'center',
-        borderWidth: 1,
-        borderColor: '#e2e8f0',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 3,
     },
     dateMonth: {
         fontSize: 10,
@@ -151,14 +176,12 @@ const styles = StyleSheet.create({
         textTransform: 'uppercase',
     },
     dateDay: {
-        fontSize: 24,
+        fontSize: 22,
         fontWeight: '900',
         color: '#1e293b',
     },
     eventInfo: {
-        flex: 1,
-        marginLeft: 16,
-        marginRight: 8,
+        padding: 16,
     },
     eventCategory: {
         fontSize: 10,
