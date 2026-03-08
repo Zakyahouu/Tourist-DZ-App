@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, TextInput } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, TextInput, ScrollView } from 'react-native';
 import MapView, { Marker, Callout } from 'react-native-maps';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { supabase } from '@/src/lib/supabase';
@@ -8,6 +8,17 @@ import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import logger from '@/src/utils/logger';
 
+const CATEGORY_COLORS: Record<string, string> = {
+    historical: '#eab308',
+    natural: '#22c55e',
+    cultural: '#a855f7',
+    thermal: '#3b82f6',
+    accommodation: '#ef4444',
+    default: '#f97316',
+};
+
+const CATEGORIES = ['all', 'historical', 'natural', 'cultural', 'thermal', 'accommodation'] as const;
+
 const ExploreScreen = () => {
     const insets = useSafeAreaInsets();
     const router = useRouter();
@@ -15,6 +26,7 @@ const ExploreScreen = () => {
     const lang = i18n.language || 'fr';
     const [sites, setSites] = useState<any[]>([]);
     const [searchQuery, setSearchQuery] = useState('');
+    const [activeCategory, setActiveCategory] = useState('all');
     const [region, setRegion] = useState({
         latitude: 34.8516,
         longitude: 5.7281,
@@ -23,29 +35,56 @@ const ExploreScreen = () => {
     });
 
     useEffect(() => {
-        async function fetchSites() {
+        async function fetchMapData() {
             try {
-                const { data, error } = await supabase
+                const { data: sitesData, error: sitesError } = await supabase
                     .from('tourist_sites')
-                    .select('*')
+                    .select('*, site_images(image_url)')
                     .eq('is_active', true);
-                if (data) setSites(data);
-                if (error) logger.error('Error fetching sites:', error);
+                if (sitesError) logger.error('Error fetching sites:', sitesError);
+
+                const { data: accData, error: accError } = await supabase
+                    .from('accommodations')
+                    .select('*, accommodation_images(image_url)')
+                    .eq('is_active', true);
+                if (accError) logger.error('Error fetching accommodations:', accError);
+
+                const mappedAccs = (accData || []).map(acc => ({
+                    id: acc.id,
+                    name: acc.name,
+                    category: 'accommodation',
+                    address: acc.address || '',
+                    description: acc.description,
+                    latitude: acc.latitude,
+                    longitude: acc.longitude,
+                    avg_rating: acc.rating || 0,
+                    site_images: acc.accommodation_images || [],
+                    is_accommodation: true,
+                    type: acc.type,
+                }));
+
+                setSites([...(sitesData || []), ...mappedAccs]);
             } catch (err) {
                 logger.error('Fetch error:', err);
             }
         }
-        fetchSites();
+        fetchMapData();
     }, []);
 
     const filteredSites = useMemo(() => {
-        if (!searchQuery.trim()) return sites;
-        const q = searchQuery.toLowerCase();
-        return sites.filter(s => {
-            const name = (s.name?.[lang] || s.name?.fr || '').toLowerCase();
-            return name.includes(q);
-        });
-    }, [sites, searchQuery, lang]);
+        let result = sites;
+        if (activeCategory !== 'all') {
+            result = result.filter(s => s.category === activeCategory);
+        }
+        if (searchQuery.trim()) {
+            const q = searchQuery.toLowerCase();
+            result = result.filter(s => {
+                const name = (s.name?.[lang] || s.name?.fr || '').toLowerCase();
+                return name.includes(q);
+            });
+        }
+        return result;
+    }, [sites, searchQuery, lang, activeCategory]);
 
     return (
         <View style={styles.container}>
@@ -61,18 +100,13 @@ const ExploreScreen = () => {
                             latitude: site.latitude || 34.85,
                             longitude: site.longitude || 5.73,
                         }}
-                        pinColor="#f97316"
-                        onPress={() => router.push(`/site/${site.id}`)}
-                        onCalloutPress={() => {
-                            router.push(`/site/${site.id}`);
-                        }}
+                        pinColor={CATEGORY_COLORS[site.category] || CATEGORY_COLORS.default}
+                        onPress={() => router.push(site.is_accommodation ? `/accommodation/${site.id}` : `/site/${site.id}`)}
+                        onCalloutPress={() => router.push(site.is_accommodation ? `/accommodation/${site.id}` : `/site/${site.id}`)}
                     >
-                        <Callout
-                            tooltip={false}
-                            onPress={() => router.push(`/site/${site.id}`)}
-                        >
+                        <Callout tooltip={false}>
                             <View style={styles.calloutContainer}>
-                                <Text style={styles.calloutTitle}>{site.name?.[lang] || site.name?.fr || 'Unknown Site'}</Text>
+                                <Text style={styles.calloutTitle}>{site.name?.[lang] || site.name?.fr || 'Unknown'}</Text>
                                 <Text style={styles.calloutCategory}>{(site.category || '').toUpperCase()}</Text>
                                 <Text style={styles.calloutHint}>{t('details.viewDetails')} →</Text>
                             </View>
@@ -81,7 +115,8 @@ const ExploreScreen = () => {
                 ))}
             </MapView>
 
-            <View style={[styles.overlay, { top: insets.top + 20 }]}>
+            {/* Search + Category Filters */}
+            <View style={[styles.overlay, { top: insets.top + 10 }]}>
                 <View style={styles.searchBar}>
                     <Search size={16} stroke="#94a3b8" style={{ marginRight: 8 }} />
                     <TextInput
@@ -92,6 +127,22 @@ const ExploreScreen = () => {
                         onChangeText={setSearchQuery}
                     />
                 </View>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterRow}>
+                    {CATEGORIES.map(cat => (
+                        <TouchableOpacity
+                            key={cat}
+                            style={[styles.filterChip, activeCategory === cat && styles.filterChipActive]}
+                            onPress={() => setActiveCategory(cat)}
+                        >
+                            {cat !== 'all' && (
+                                <View style={[styles.colorDot, { backgroundColor: CATEGORY_COLORS[cat] }]} />
+                            )}
+                            <Text style={[styles.filterText, activeCategory === cat && styles.filterTextActive]}>
+                                {t(`categories.${cat}`)}
+                            </Text>
+                        </TouchableOpacity>
+                    ))}
+                </ScrollView>
             </View>
 
             <View style={[styles.floatingActions, { bottom: 30 }]}>
@@ -123,8 +174,8 @@ const styles = StyleSheet.create({
     },
     overlay: {
         position: 'absolute',
-        left: 20,
-        right: 20,
+        left: 16,
+        right: 16,
     },
     searchBar: {
         backgroundColor: 'white',
@@ -144,6 +195,41 @@ const styles = StyleSheet.create({
         fontSize: 14,
         fontWeight: '600',
         color: '#1e293b',
+    },
+    filterRow: {
+        paddingTop: 10,
+        paddingBottom: 4,
+        gap: 8,
+    },
+    filterChip: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: 'white',
+        paddingHorizontal: 14,
+        paddingVertical: 8,
+        borderRadius: 20,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.06,
+        shadowRadius: 4,
+        elevation: 2,
+    },
+    filterChipActive: {
+        backgroundColor: '#1e293b',
+    },
+    colorDot: {
+        width: 8,
+        height: 8,
+        borderRadius: 4,
+        marginRight: 6,
+    },
+    filterText: {
+        fontSize: 12,
+        fontWeight: '700',
+        color: '#64748b',
+    },
+    filterTextActive: {
+        color: 'white',
     },
     floatingActions: {
         position: 'absolute',

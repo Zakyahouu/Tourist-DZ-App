@@ -51,7 +51,8 @@ const resources = {
                 "historical": "Historical",
                 "natural": "Natural",
                 "cultural": "Cultural",
-                "thermal": "Thermal/Spa"
+                "thermal": "Thermal/Spa",
+                "accommodation": "Accommodation"
             },
             "features": {
                 "audioGuide": "Audio Guide",
@@ -99,13 +100,20 @@ const resources = {
                 "joinEvent": "Join this Event",
                 "alreadyRegistered": "Already Registered",
                 "registeredSuccess": "You are now registered for this event!",
-                "registrationError": "Registration Error"
+                "registrationError": "Registration Error",
+                "types": {
+                    "tour": "Tours",
+                    "camp": "Camps",
+                    "competition": "Competitions",
+                    "volunteer": "Volunteer"
+                }
             },
             "gallery": {
                 "loginToUpload": "You need to be logged in to upload photos.",
                 "permissionRequired": "Media Library Permission Required",
                 "permissionText": "We need access to your photo library to upload images.",
-                "uploadFailed": "Failed to upload the photo. Please try again."
+                "uploadFailed": "Failed to upload the photo. Please try again.",
+                "competition": "Competition"
             },
             "review": {
                 "title": "Leave a Review",
@@ -124,10 +132,29 @@ const resources = {
                 "patient": "Patient",
                 "lowIncome": "Low Income",
                 "specialNeeds": "Special Needs (optional)",
+                "preferredTrips": "Preferred Trip Types",
+                "selectTripType": "Please select at least one trip type.",
+                "tripTypes": {
+                    "oasis_walk": "Oasis Walk",
+                    "museum_visit": "Museum Visit",
+                    "thermal_bath": "Thermal Bath",
+                    "city_tour": "City Tour",
+                    "desert_excursion": "Desert Excursion"
+                },
                 "submit": "Submit Application",
                 "success": "Application submitted successfully!",
                 "error": "Failed to submit application. Please try again.",
                 "loginRequired": "Please log in to apply."
+            },
+            "accommodationTypes": {
+                "hotel": "Hotel",
+                "guesthouse": "Guesthouse",
+                "hostel": "Hostel",
+                "restaurant": "Restaurant",
+                "cafe": "Café",
+                "riad": "Riad",
+                "apartment": "Apartment",
+                "camping": "Camping"
             }
         }
     },
@@ -179,7 +206,8 @@ const resources = {
                 "historical": "Historique",
                 "natural": "Naturel",
                 "cultural": "Culturel",
-                "thermal": "Thermal/Spa"
+                "thermal": "Thermal/Spa",
+                "accommodation": "Hébergement"
             },
             "features": {
                 "audioGuide": "Guide Audio",
@@ -227,13 +255,20 @@ const resources = {
                 "joinEvent": "Rejoindre cet événement",
                 "alreadyRegistered": "Déjà inscrit",
                 "registeredSuccess": "Vous êtes maintenant inscrit à cet événement !",
-                "registrationError": "Erreur d'inscription"
+                "registrationError": "Erreur d'inscription",
+                "types": {
+                    "tour": "Excursions",
+                    "camp": "Camps",
+                    "competition": "Compétitions",
+                    "volunteer": "Bénévolat"
+                }
             },
             "gallery": {
                 "loginToUpload": "Vous devez être connecté pour télécharger des photos.",
                 "permissionRequired": "Permission de bibliothèque requise",
                 "permissionText": "Nous avons besoin d'accéder à votre photothèque.",
-                "uploadFailed": "Échec du téléchargement. Veuillez réessayer."
+                "uploadFailed": "Échec du téléchargement. Veuillez réessayer.",
+                "competition": "Compétition"
             },
             "review": {
                 "title": "Laisser un avis",
@@ -252,10 +287,29 @@ const resources = {
                 "patient": "Patient",
                 "lowIncome": "Faible revenu",
                 "specialNeeds": "Besoins spéciaux (facultatif)",
+                "preferredTrips": "Types de voyages préférés",
+                "selectTripType": "Veuillez sélectionner au moins un type de voyage.",
+                "tripTypes": {
+                    "oasis_walk": "Balade dans l'oasis",
+                    "museum_visit": "Visite de musée",
+                    "thermal_bath": "Bain thermal",
+                    "city_tour": "Tour de ville",
+                    "desert_excursion": "Excursion au désert"
+                },
                 "submit": "Soumettre la demande",
                 "success": "Demande soumise avec succès !",
                 "error": "Échec de la soumission. Veuillez réessayer.",
                 "loginRequired": "Connectez-vous pour postuler."
+            },
+            "accommodationTypes": {
+                "hotel": "Hôtel",
+                "guesthouse": "Maison d'hôtes",
+                "hostel": "Auberge",
+                "restaurant": "Restaurant",
+                "cafe": "Café",
+                "riad": "Riad",
+                "apartment": "Appartement",
+                "camping": "Camping"
             }
         }
     },
@@ -307,7 +361,8 @@ const resources = {
                 "historical": "تاريخي",
                 "natural": "طبيعي",
                 "cultural": "ثقافي",
-                "thermal": "حموي"
+                "thermal": "حموي",
+                "accommodation": "إقامة"
             },
             "features": {
                 "audioGuide": "دليل صوتي",
@@ -355,13 +410,20 @@ const resources = {
                 "joinEvent": "انضم لهذه الفعالية",
                 "alreadyRegistered": "مسجل بالفعل",
                 "registeredSuccess": "تم تسجيلك في هذه الفعالية بنجاح!",
-                "registrationError": "خطأ في التسجيل"
+                "registrationError": "خطأ في التسجيل",
+                "types": {
+                    "tour": "جولات",
+                    "camp": "مخيمات",
+                    "competition": "مسابقات",
+                    "volunteer": "تطوع"
+                }
             },
             "gallery": {
                 "loginToUpload": "يجب تسجيل الدخول لتحميل الصور.",
                 "permissionRequired": "مطلوب إذن مكتبة الصور",
                 "permissionText": "نحتاج للوصول إلى مكتبة صورك لتحميل الصور.",
-                "uploadFailed": "فشل تحميل الصورة. يرجى المحاولة مرة أخرى."
+                "uploadFailed": "فشل تحميل الصورة. يرجى المحاولة مرة أخرى.",
+                "competition": "مسابقة"
             },
             "review": {
                 "title": "اترك تقييمًا",
@@ -380,10 +442,29 @@ const resources = {
                 "patient": "مريض",
                 "lowIncome": "ذو دخل منخفض",
                 "specialNeeds": "احتياجات خاصة (اختياري)",
+                "preferredTrips": "أنواع الرحلات المفضلة",
+                "selectTripType": "يرجى اختيار نوع رحلة واحد على الأقل.",
+                "tripTypes": {
+                    "oasis_walk": "نزهة في الواحة",
+                    "museum_visit": "زيارة متحف",
+                    "thermal_bath": "حمام حراري",
+                    "city_tour": "جولة في المدينة",
+                    "desert_excursion": "رحلة صحراوية"
+                },
                 "submit": "تقديم الطلب",
                 "success": "تم تقديم الطلب بنجاح!",
                 "error": "فشل تقديم الطلب. يرجى المحاولة مرة أخرى.",
                 "loginRequired": "سجّل الدخول للتقديم."
+            },
+            "accommodationTypes": {
+                "hotel": "فندق",
+                "guesthouse": "دار ضيافة",
+                "hostel": "نزل",
+                "restaurant": "مطعم",
+                "cafe": "مقهى",
+                "riad": "رياض",
+                "apartment": "شقة",
+                "camping": "تخييم"
             }
         }
     }

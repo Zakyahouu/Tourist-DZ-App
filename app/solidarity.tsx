@@ -22,6 +22,8 @@ import logger from '../src/utils/logger';
 const CATEGORIES = ['disability', 'patient', 'low_income'] as const;
 type Category = typeof CATEGORIES[number];
 
+const TRIP_TYPES = ['oasis_walk', 'museum_visit', 'thermal_bath', 'city_tour', 'desert_excursion'] as const;
+
 export default function SolidarityScreen() {
     const router = useRouter();
     const insets = useSafeAreaInsets();
@@ -32,27 +34,34 @@ export default function SolidarityScreen() {
     const [phone, setPhone] = useState('');
     const [category, setCategory] = useState<Category>('disability');
     const [specialNeeds, setSpecialNeeds] = useState('');
+    const [preferredTripTypes, setPreferredTripTypes] = useState<string[]>([]);
     const [submitting, setSubmitting] = useState(false);
 
+    const toggleTripType = (type: string) => {
+        setPreferredTripTypes(prev =>
+            prev.includes(type) ? prev.filter(t => t !== type) : [...prev, type]
+        );
+    };
+
     const handleSubmit = async () => {
-        if (!user) {
-            Alert.alert(t('auth.loginRequired'), t('solidarity.loginRequired'));
-            router.push('/(auth)/login');
-            return;
-        }
         if (!fullName.trim() || !phone.trim()) {
             Alert.alert(t('common.error'), 'Please fill in your full name and phone number.');
+            return;
+        }
+        if (preferredTripTypes.length === 0) {
+            Alert.alert(t('common.error'), t('solidarity.selectTripType'));
             return;
         }
         if (submitting) return;
         setSubmitting(true);
         try {
             const { error } = await supabase.from('solidarity_applications').insert({
-                user_id: user.id,
+                user_id: user?.id || null,
                 full_name: fullName.trim(),
                 phone: phone.trim(),
                 category,
                 special_needs: specialNeeds.trim() || null,
+                preferred_trip_types: preferredTripTypes,
             });
             if (error) throw error;
             Alert.alert(t('solidarity.success'), undefined, [
@@ -119,6 +128,24 @@ export default function SolidarityScreen() {
                                 </Text>
                             </TouchableOpacity>
                         ))}
+                    </View>
+
+                    <Text style={styles.label}>{t('solidarity.preferredTrips')}</Text>
+                    <View style={styles.categoryRow}>
+                        {TRIP_TYPES.map(type => {
+                            const selected = preferredTripTypes.includes(type);
+                            return (
+                                <TouchableOpacity
+                                    key={type}
+                                    style={[styles.catBtn, selected && styles.tripBtnActive]}
+                                    onPress={() => toggleTripType(type)}
+                                >
+                                    <Text style={[styles.catText, selected && styles.catTextActive]}>
+                                        {t(`solidarity.tripTypes.${type}`)}
+                                    </Text>
+                                </TouchableOpacity>
+                            );
+                        })}
                     </View>
 
                     <Text style={styles.label}>{t('solidarity.specialNeeds')}</Text>
@@ -243,6 +270,10 @@ const styles = StyleSheet.create({
     catBtnActive: {
         backgroundColor: '#1e293b',
         borderColor: '#1e293b',
+    },
+    tripBtnActive: {
+        backgroundColor: '#0d9488',
+        borderColor: '#0d9488',
     },
     catText: {
         fontSize: 13,
