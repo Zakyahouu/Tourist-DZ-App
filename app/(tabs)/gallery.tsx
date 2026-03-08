@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { StyleSheet, View, Text, FlatList, TouchableOpacity, Image, Dimensions, Alert, ActivityIndicator } from 'react-native';
+import { StyleSheet, View, Text, FlatList, TouchableOpacity, Image, Dimensions, Alert, ActivityIndicator, Modal, Pressable } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { supabase } from '@/src/lib/supabase';
-import { Heart, Plus, Camera, Trophy } from 'lucide-react-native';
+import { Heart, Plus, Camera, Trophy, X } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/src/context/AuthContext';
 import logger from '@/src/utils/logger';
@@ -20,6 +20,7 @@ export default function GalleryScreen() {
     const [likedIds, setLikedIds] = useState<Set<string>>(new Set());
     const [uploading, setUploading] = useState(false);
     const [filter, setFilter] = useState<'all' | 'competition'>('all');
+    const [selectedItem, setSelectedItem] = useState<any>(null);
 
     const fetchGallery = useCallback(async () => {
         setLoading(true);
@@ -152,7 +153,7 @@ export default function GalleryScreen() {
         const liked = likedIds.has(item.id);
         const authorName = item.profiles?.full_name;
         return (
-            <TouchableOpacity style={styles.imageCard} activeOpacity={0.9}>
+            <TouchableOpacity style={styles.imageCard} activeOpacity={0.9} onPress={() => setSelectedItem(item)}>
                 <Image
                     source={{ uri: item.image_url }}
                     style={styles.image}
@@ -240,6 +241,50 @@ export default function GalleryScreen() {
                     windowSize={5}
                 />
             )}
+
+            {/* Full-screen image viewer */}
+            <Modal visible={!!selectedItem} transparent animationType="fade" statusBarTranslucent>
+                <View style={styles.modalContainer}>
+                    <Pressable style={styles.modalBackdrop} onPress={() => setSelectedItem(null)} />
+                    {selectedItem && (
+                        <View style={styles.modalContent}>
+                            <Image
+                                source={{ uri: selectedItem.image_url }}
+                                style={styles.modalImage}
+                                resizeMode="contain"
+                            />
+                            <View style={styles.modalInfo}>
+                                <View style={styles.modalInfoRow}>
+                                    <View style={{ flex: 1 }}>
+                                        {selectedItem.profiles?.full_name && (
+                                            <Text style={styles.modalAuthor}>{selectedItem.profiles.full_name}</Text>
+                                        )}
+                                        {selectedItem.caption && (
+                                            <Text style={styles.modalCaption}>{selectedItem.caption}</Text>
+                                        )}
+                                        {selectedItem.is_competition_entry && (
+                                            <View style={styles.modalTrophyRow}>
+                                                <Trophy size={12} stroke="#eab308" fill="#eab308" />
+                                                <Text style={styles.modalTrophyText}>{t('gallery.competition')}</Text>
+                                            </View>
+                                        )}
+                                    </View>
+                                    <TouchableOpacity
+                                        style={[styles.modalLikeBtn, likedIds.has(selectedItem.id) && styles.modalLikeBtnActive]}
+                                        onPress={() => toggleLike(selectedItem)}
+                                    >
+                                        <Heart size={18} stroke="white" fill={likedIds.has(selectedItem.id) ? 'white' : 'transparent'} />
+                                        <Text style={styles.modalLikeText}>{selectedItem.likes_count || 0}</Text>
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
+                            <TouchableOpacity style={styles.modalCloseBtn} onPress={() => setSelectedItem(null)}>
+                                <X size={24} stroke="white" />
+                            </TouchableOpacity>
+                        </View>
+                    )}
+                </View>
+            </Modal>
         </View>
     );
 }
@@ -394,5 +439,89 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: '#64748b',
         textAlign: 'center',
+    },
+    modalContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    modalBackdrop: {
+        ...StyleSheet.absoluteFillObject,
+        backgroundColor: 'rgba(0,0,0,0.92)',
+    },
+    modalContent: {
+        width: '100%',
+        height: '100%',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    modalImage: {
+        width: '100%',
+        height: '70%',
+    },
+    modalInfo: {
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        paddingHorizontal: 20,
+        paddingBottom: 50,
+        paddingTop: 16,
+        backgroundColor: 'rgba(0,0,0,0.5)',
+    },
+    modalInfoRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+    },
+    modalAuthor: {
+        color: 'white',
+        fontSize: 16,
+        fontWeight: '800',
+    },
+    modalCaption: {
+        color: 'rgba(255,255,255,0.8)',
+        fontSize: 13,
+        fontWeight: '500',
+        marginTop: 4,
+    },
+    modalTrophyRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 4,
+        marginTop: 6,
+    },
+    modalTrophyText: {
+        color: '#eab308',
+        fontSize: 12,
+        fontWeight: '700',
+    },
+    modalLikeBtn: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: 'rgba(255,255,255,0.2)',
+        paddingHorizontal: 14,
+        paddingVertical: 8,
+        borderRadius: 20,
+        gap: 6,
+    },
+    modalLikeBtnActive: {
+        backgroundColor: '#ec4899',
+    },
+    modalLikeText: {
+        color: 'white',
+        fontSize: 14,
+        fontWeight: '700',
+    },
+    modalCloseBtn: {
+        position: 'absolute',
+        top: 50,
+        right: 20,
+        backgroundColor: 'rgba(0,0,0,0.5)',
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        alignItems: 'center',
+        justifyContent: 'center',
     },
 });
