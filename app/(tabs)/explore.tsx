@@ -1,5 +1,5 @@
-﻿import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, TextInput, ScrollView, ActivityIndicator } from 'react-native';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { StyleSheet, View, Text, TouchableOpacity, TextInput, ScrollView, ActivityIndicator, Platform } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { supabase } from '@/src/lib/supabase';
@@ -7,7 +7,6 @@ import { Navigation, Search, Camera } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import logger from '@/src/utils/logger';
-import { LEAFLET_CSS, LEAFLET_JS } from '@/src/lib/leaflet-bundle';
 
 const CATEGORY_COLORS: Record<string, string> = {
     historical: '#eab308',
@@ -20,70 +19,9 @@ const CATEGORY_COLORS: Record<string, string> = {
 
 const CATEGORIES = ['all', 'historical', 'natural', 'cultural', 'thermal', 'accommodation'] as const;
 
-function buildLeafletHtml(markers: any[], lang: string) {
-    const safeMarkers = markers
-        .filter(s => s.latitude && s.longitude)
-        .map(s => ({
-            id: s.id,
-            lat: s.latitude,
-            lng: s.longitude,
-            name: s.name?.[lang] || s.name?.fr || s.name || '',
-            category: s.category || 'default',
-            is_accommodation: !!s.is_accommodation,
-            color: CATEGORY_COLORS[s.category] || CATEGORY_COLORS.default,
-        }));
-    const markersJson = JSON.stringify(safeMarkers);
-
-    return `<!DOCTYPE html>
-<html><head>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <style>${LEAFLET_CSS}</style>
-  <style>
-    * { margin:0; padding:0; box-sizing:border-box; }
-    html, body { width:100%; height:100%; overflow:hidden; }
-    #map { position:fixed; top:0; left:0; width:100%; height:100%; }
-    .custom-marker { width:24px; height:24px; border-radius:50%; border:2px solid white;
-      box-shadow:0 2px 6px rgba(0,0,0,0.35); cursor:pointer; }
-    .leaflet-popup-content { font-family:sans-serif; min-width:120px; }
-    .popup-name { font-weight:700; font-size:14px; color:#1e293b; margin-bottom:4px; }
-    .popup-cat { font-size:11px; font-weight:600; color:#94a3b8; text-transform:uppercase; margin-bottom:8px; }
-    .popup-btn { display:block; text-align:center; background:#1e293b; color:white;
-      padding:6px 12px; border-radius:12px; font-size:12px; font-weight:700;
-      cursor:pointer; text-decoration:none; }
-  </style>
-</head><body>
-  <div id="map"></div>
-  <script>${LEAFLET_JS}</script>
-  <script>
-    var map = L.map('map', { zoomControl: true }).setView([34.8516, 5.7281], 12);
-    setTimeout(function() { map.invalidateSize(); }, 200);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-      maxZoom: 19
-    }).addTo(map);
-
-    var markers = ${markersJson};
-    markers.forEach(function(site) {
-      var icon = L.divIcon({
-        className: '',
-        html: '<div class="custom-marker" style="background:' + site.color + ';"></div>',
-        iconSize: [24, 24],
-        iconAnchor: [12, 12],
-        popupAnchor: [0, -14]
-      });
-      var m = L.marker([site.lat, site.lng], { icon: icon }).addTo(map);
-      var popupHtml = '<div class="popup-name">' + site.name + '</div>'
-        + '<div class="popup-cat">' + site.category + '</div>'
-        + '<a class="popup-btn" onclick="sendTap(\'' + site.id + '\',' + site.is_accommodation + ')">View â†’</a>';
-      m.bindPopup(popupHtml);
-    });
-
-    function sendTap(id, isAcc) {
-      window.ReactNativeWebView.postMessage(JSON.stringify({ id: id, is_accommodation: isAcc }));
-    }
-  </script>
-</body></html>`;
-}
+const MAP_URI = Platform.OS === 'android'
+    ? 'file:///android_asset/map.html'
+    : 'file:///map.html';
 
 const ExploreScreen = () => {
     const insets = useSafeAreaInsets();
@@ -93,6 +31,8 @@ const ExploreScreen = () => {
     const [sites, setSites] = useState<any[]>([]);
     const [searchQuery, setSearchQuery] = useState('');
     const [activeCategory, setActiveCategory] = useState('all');
+    const [mapReady, setMapReady] = useState(false);
+    const webviewRef = useRef<WebView>(null);
 
     useEffect(() => {
         async function fetchMapData() {
@@ -146,7 +86,23 @@ const ExploreScreen = () => {
         return result;
     }, [sites, searchQuery, lang, activeCategory]);
 
-    const mapHtml = useMemo(() => buildLeafletHtml(filteredSites, lang), [filteredSites, lang]);
+    // Inject markers whenever data or map readiness changes
+    useEffect(() => {
+        if (!mapReady || !webviewRef.current) return;
+        const markers = filteredSites
+            .filter(s => s.latitude && s.longitude)
+            .map(s => ({
+                id: String(s.id),
+                lat: s.latitude,
+                lng: s.longitude,
+                name: s.name?.[lang] || s.name?.fr || s.name || '',
+                category: s.category || 'default',
+                isAcc: !!s.is_accommodation,
+                color: CATEGORY_COLORS[s.category] || CATEGORY_COLORS.default,
+            }));
+        const json = JSON.stringify(markers).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+        webviewRef.current.injectJavaScript(`window.updateMarkers('${json}'); true;`);
+    }, [filteredSites, lang, mapReady]);
 
     function handleWebViewMessage(event: any) {
         try {
@@ -160,14 +116,17 @@ const ExploreScreen = () => {
     return (
         <View style={styles.container}>
             <WebView
-                key={mapHtml}
+                ref={webviewRef}
                 style={styles.map}
-                source={{ html: mapHtml }}
-                originWhitelist={['*']}
+                source={{ uri: MAP_URI }}
+                originWhitelist={['*', 'file://*']}
                 onMessage={handleWebViewMessage}
                 javaScriptEnabled
                 domStorageEnabled
+                allowFileAccess
+                allowUniversalAccessFromFileURLs
                 mixedContentMode="always"
+                onLoadEnd={() => setMapReady(true)}
                 startInLoadingState={true}
                 renderLoading={() => (
                     <View style={styles.mapLoader}>
@@ -233,6 +192,12 @@ const styles = StyleSheet.create({
     map: {
         ...StyleSheet.absoluteFillObject,
     },
+    mapLoader: {
+        ...StyleSheet.absoluteFillObject,
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: '#f1f5f9',
+    },
     overlay: {
         position: 'absolute',
         left: 16,
@@ -291,12 +256,6 @@ const styles = StyleSheet.create({
     },
     filterTextActive: {
         color: 'white',
-    },
-    mapLoader: {
-        ...StyleSheet.absoluteFillObject,
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: '#f1f5f9',
     },
     floatingActions: {
         position: 'absolute',
