@@ -1,5 +1,5 @@
 ﻿import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, TextInput, ScrollView } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, TextInput, ScrollView, ActivityIndicator } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { supabase } from '@/src/lib/supabase';
@@ -36,8 +36,8 @@ function buildLeafletHtml(markers: any[], lang: string) {
     return `<!DOCTYPE html>
 <html><head>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.js"></script>
   <style>
     * { margin:0; padding:0; box-sizing:border-box; }
     html, body, #map { width:100%; height:100%; }
@@ -159,13 +159,20 @@ const ExploreScreen = () => {
             <WebView
                 key={mapHtml}
                 style={styles.map}
-                source={{ html: mapHtml }}
+                source={{ html: mapHtml, baseUrl: 'https://localhost' }}
                 originWhitelist={['*']}
                 onMessage={handleWebViewMessage}
                 javaScriptEnabled
                 domStorageEnabled
-                startInLoadingState={false}
+                allowUniversalAccessFromFileURLs
+                allowFileAccess
                 mixedContentMode="always"
+                startInLoadingState={true}
+                renderLoading={() => (
+                    <View style={styles.mapLoader}>
+                        <ActivityIndicator size="large" color="#1e293b" />
+                    </View>
+                )}
             />
 
             {/* Search + Category Filters */}
@@ -283,6 +290,12 @@ const styles = StyleSheet.create({
     },
     filterTextActive: {
         color: 'white',
+    },
+    mapLoader: {
+        ...StyleSheet.absoluteFillObject,
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: '#f1f5f9',
     },
     floatingActions: {
         position: 'absolute',
