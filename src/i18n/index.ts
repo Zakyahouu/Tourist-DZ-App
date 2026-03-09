@@ -17,6 +17,8 @@ const resources = {
                 "dontHaveAccount": "Don't have an account?",
                 "alreadyHaveAccount": "Already have an account?",
                 "createAccount": "Create Account",
+                "joinCommunity": "Join the TouristDZ community",
+                "fullName": "Full Name"
             },
             "nav": {
                 "home": "Home",
@@ -160,10 +162,6 @@ const resources = {
                 "error": "Failed to submit application. Please try again.",
                 "loginRequired": "Please log in to apply."
             },
-            "app": {
-                "joinCommunity": "Join the TouristDZ community",
-                "fullName": "Full Name"
-            },
             "profile": {
                 "welcome": "Welcome to",
                 "guestSubtitle": "Join us to save your favorite places and register for unique events in Biskra.",
@@ -209,6 +207,8 @@ const resources = {
                 "dontHaveAccount": "Vous n'avez pas de compte ?",
                 "alreadyHaveAccount": "Vous avez déjà un compte ?",
                 "createAccount": "Créer un compte",
+                "joinCommunity": "Rejoignez la communauté TouristDZ",
+                "fullName": "Nom complet"
             },
             "nav": {
                 "home": "Accueil",
@@ -352,10 +352,6 @@ const resources = {
                 "error": "Échec de la soumission. Veuillez réessayer.",
                 "loginRequired": "Connectez-vous pour postuler."
             },
-            "app": {
-                "joinCommunity": "Rejoignez la communauté TouristDZ",
-                "fullName": "Nom complet"
-            },
             "profile": {
                 "welcome": "Bienvenue sur",
                 "guestSubtitle": "Rejoignez-nous pour sauvegarder vos lieux préférés et vous inscrire à des événements uniques à Biskra.",
@@ -401,6 +397,8 @@ const resources = {
                 "dontHaveAccount": "ليس لديك حساب؟",
                 "alreadyHaveAccount": "لديك حساب بالفعل؟",
                 "createAccount": "إنشاء حساب",
+                "joinCommunity": "انضم إلى مجتمع TouristDZ",
+                "fullName": "الاسم الكامل"
             },
             "nav": {
                 "home": "الرئيسية",
@@ -543,10 +541,6 @@ const resources = {
                 "success": "تم تقديم الطلب بنجاح!",
                 "error": "فشل تقديم الطلب. يرجى المحاولة مرة أخرى.",
                 "loginRequired": "سجّل الدخول للتقديم."
-            },
-            "app": {
-                "joinCommunity": "انضم إلى مجتمع TouristDZ",
-                "fullName": "الاسم الكامل"
             },
             "profile": {
                 "welcome": "مرحبًا بك في",

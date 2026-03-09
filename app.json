@@ -23,7 +23,12 @@
       "permissions": [
         "android.permission.RECORD_AUDIO"
       ],
-      "package": "com.boucettazakaria.touristdz"
+      "package": "com.boucettazakaria.touristdz",
+      "config": {
+        "googleMaps": {
+          "apiKey": "REPLACE_WITH_REAL_GOOGLE_MAPS_API_KEY"
+        }
+      }
     },
     "web": {
       "output": "static",
