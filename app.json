@@ -50,7 +50,17 @@
         }
       ],
       "expo-localization",
-      "expo-secure-store"
+      "expo-secure-store",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "packagingOptions": {
+              "pickFirsts": ["**/libworklets.so"]
+            }
+          }
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": false,
