@@ -7,6 +7,7 @@ import { Navigation, Search, Camera } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import logger from '@/src/utils/logger';
+import { LEAFLET_CSS, LEAFLET_JS } from '@/src/lib/leaflet-bundle';
 
 const CATEGORY_COLORS: Record<string, string> = {
     historical: '#eab308',
@@ -35,12 +36,12 @@ function buildLeafletHtml(markers: any[], lang: string) {
 
     return `<!DOCTYPE html>
 <html><head>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.css"/>
-  <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <style>${LEAFLET_CSS}</style>
   <style>
     * { margin:0; padding:0; box-sizing:border-box; }
-    html, body, #map { width:100%; height:100%; }
+    html, body { width:100%; height:100%; overflow:hidden; }
+    #map { position:fixed; top:0; left:0; width:100%; height:100%; }
     .custom-marker { width:24px; height:24px; border-radius:50%; border:2px solid white;
       box-shadow:0 2px 6px rgba(0,0,0,0.35); cursor:pointer; }
     .leaflet-popup-content { font-family:sans-serif; min-width:120px; }
@@ -52,8 +53,10 @@ function buildLeafletHtml(markers: any[], lang: string) {
   </style>
 </head><body>
   <div id="map"></div>
+  <script>${LEAFLET_JS}</script>
   <script>
     var map = L.map('map', { zoomControl: true }).setView([34.8516, 5.7281], 12);
+    setTimeout(function() { map.invalidateSize(); }, 200);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
       maxZoom: 19
@@ -159,13 +162,11 @@ const ExploreScreen = () => {
             <WebView
                 key={mapHtml}
                 style={styles.map}
-                source={{ html: mapHtml, baseUrl: 'https://localhost' }}
+                source={{ html: mapHtml }}
                 originWhitelist={['*']}
                 onMessage={handleWebViewMessage}
                 javaScriptEnabled
                 domStorageEnabled
-                allowUniversalAccessFromFileURLs
-                allowFileAccess
                 mixedContentMode="always"
                 startInLoadingState={true}
                 renderLoading={() => (
