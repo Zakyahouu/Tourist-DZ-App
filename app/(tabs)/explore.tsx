@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, TextInput, ScrollView, ActivityIndicator, Platform } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, TextInput, ScrollView, ActivityIndicator } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Asset } from 'expo-asset';
 import { supabase } from '@/src/lib/supabase';
 import { Navigation, Search, Camera } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
@@ -19,9 +20,9 @@ const CATEGORY_COLORS: Record<string, string> = {
 
 const CATEGORIES = ['all', 'historical', 'natural', 'cultural', 'thermal', 'accommodation'] as const;
 
-const MAP_URI = Platform.OS === 'android'
-    ? 'file:///android_asset/map.html'
-    : 'file:///map.html';
+// Preload the map asset immediately (not inside component to avoid re-requiring)
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const MAP_ASSET = Asset.fromModule(require('../../assets/web/map.html'));
 
 const ExploreScreen = () => {
     const insets = useSafeAreaInsets();
@@ -31,9 +32,18 @@ const ExploreScreen = () => {
     const [sites, setSites] = useState<any[]>([]);
     const [searchQuery, setSearchQuery] = useState('');
     const [activeCategory, setActiveCategory] = useState('all');
+    const [mapUri, setMapUri] = useState<string | null>(null);
     const [mapReady, setMapReady] = useState(false);
     const webviewRef = useRef<WebView>(null);
 
+    // Load the map HTML asset to a local URI on first render
+    useEffect(() => {
+        MAP_ASSET.downloadAsync().then(() => {
+            setMapUri(MAP_ASSET.localUri);
+        }).catch((e) => logger.error('map asset load error:', e));
+    }, []);
+
+    // Fetch sites/accommodations from Supabase
     useEffect(() => {
         async function fetchMapData() {
             try {
@@ -53,14 +63,9 @@ const ExploreScreen = () => {
                     id: acc.id,
                     name: acc.name,
                     category: 'accommodation',
-                    address: acc.address || '',
-                    description: acc.description,
                     latitude: acc.latitude,
                     longitude: acc.longitude,
-                    avg_rating: acc.rating || 0,
-                    site_images: acc.accommodation_images || [],
                     is_accommodation: true,
-                    type: acc.type,
                 }));
 
                 setSites([...(sitesData || []), ...mappedAccs]);
@@ -86,7 +91,7 @@ const ExploreScreen = () => {
         return result;
     }, [sites, searchQuery, lang, activeCategory]);
 
-    // Inject markers whenever data or map readiness changes
+    // Whenever filtered markers or map readiness changes, inject them into the WebView
     useEffect(() => {
         if (!mapReady || !webviewRef.current) return;
         const markers = filteredSites
@@ -98,10 +103,11 @@ const ExploreScreen = () => {
                 name: s.name?.[lang] || s.name?.fr || s.name || '',
                 category: s.category || 'default',
                 isAcc: !!s.is_accommodation,
-                color: CATEGORY_COLORS[s.category] || CATEGORY_COLORS.default,
+                color: CATEGORY_COLORS[s.category as string] || CATEGORY_COLORS.default,
             }));
-        const json = JSON.stringify(markers).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
-        webviewRef.current.injectJavaScript(`window.updateMarkers('${json}'); true;`);
+        // Use JSON.stringify twice: outer stringify produces a valid JS string literal
+        const safeArg = JSON.stringify(JSON.stringify(markers));
+        webviewRef.current.injectJavaScript(`window.updateMarkers(${safeArg}); true;`);
     }, [filteredSites, lang, mapReady]);
 
     function handleWebViewMessage(event: any) {
@@ -115,25 +121,31 @@ const ExploreScreen = () => {
 
     return (
         <View style={styles.container}>
-            <WebView
-                ref={webviewRef}
-                style={styles.map}
-                source={{ uri: MAP_URI }}
-                originWhitelist={['*', 'file://*']}
-                onMessage={handleWebViewMessage}
-                javaScriptEnabled
-                domStorageEnabled
-                allowFileAccess
-                allowUniversalAccessFromFileURLs
-                mixedContentMode="always"
-                onLoadEnd={() => setMapReady(true)}
-                startInLoadingState={true}
-                renderLoading={() => (
-                    <View style={styles.mapLoader}>
-                        <ActivityIndicator size="large" color="#1e293b" />
-                    </View>
-                )}
-            />
+            {mapUri ? (
+                <WebView
+                    ref={webviewRef}
+                    style={styles.map}
+                    source={{ uri: mapUri }}
+                    originWhitelist={['*', 'file://*']}
+                    onMessage={handleWebViewMessage}
+                    javaScriptEnabled
+                    domStorageEnabled
+                    allowFileAccess
+                    allowUniversalAccessFromFileURLs
+                    mixedContentMode="always"
+                    onLoadEnd={() => setMapReady(true)}
+                    startInLoadingState={true}
+                    renderLoading={() => (
+                        <View style={styles.mapLoader}>
+                            <ActivityIndicator size="large" color="#1e293b" />
+                        </View>
+                    )}
+                />
+            ) : (
+                <View style={styles.mapLoader}>
+                    <ActivityIndicator size="large" color="#1e293b" />
+                </View>
+            )}
 
             {/* Search + Category Filters */}
             <View style={[styles.overlay, { top: insets.top + 10 }]}>
@@ -166,16 +178,10 @@ const ExploreScreen = () => {
             </View>
 
             <View style={[styles.floatingActions, { bottom: 30 }]}>
-                <TouchableOpacity
-                    style={styles.actionBtn}
-                    onPress={() => router.push('/scanner')}
-                >
+                <TouchableOpacity style={styles.actionBtn} onPress={() => router.push('/scanner')}>
                     <Camera size={24} color="white" />
                 </TouchableOpacity>
-                <TouchableOpacity
-                    style={styles.actionBtn}
-                    onPress={() => router.push('/explore')}
-                >
+                <TouchableOpacity style={styles.actionBtn} onPress={() => router.push('/explore')}>
                     <Navigation size={24} color="white" />
                 </TouchableOpacity>
             </View>
@@ -186,23 +192,15 @@ const ExploreScreen = () => {
 export default ExploreScreen;
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-    },
-    map: {
-        ...StyleSheet.absoluteFillObject,
-    },
+    container: { flex: 1 },
+    map: { ...StyleSheet.absoluteFillObject },
     mapLoader: {
         ...StyleSheet.absoluteFillObject,
         alignItems: 'center',
         justifyContent: 'center',
         backgroundColor: '#f1f5f9',
     },
-    overlay: {
-        position: 'absolute',
-        left: 16,
-        right: 16,
-    },
+    overlay: { position: 'absolute', left: 16, right: 16 },
     searchBar: {
         backgroundColor: 'white',
         height: 50,
@@ -216,17 +214,8 @@ const styles = StyleSheet.create({
         shadowRadius: 10,
         elevation: 5,
     },
-    searchInput: {
-        flex: 1,
-        fontSize: 14,
-        fontWeight: '600',
-        color: '#1e293b',
-    },
-    filterRow: {
-        paddingTop: 10,
-        paddingBottom: 4,
-        gap: 8,
-    },
+    searchInput: { flex: 1, fontSize: 14, fontWeight: '600', color: '#1e293b' },
+    filterRow: { paddingTop: 10, paddingBottom: 4, gap: 8 },
     filterChip: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -240,28 +229,11 @@ const styles = StyleSheet.create({
         shadowRadius: 4,
         elevation: 2,
     },
-    filterChipActive: {
-        backgroundColor: '#1e293b',
-    },
-    colorDot: {
-        width: 8,
-        height: 8,
-        borderRadius: 4,
-        marginRight: 6,
-    },
-    filterText: {
-        fontSize: 12,
-        fontWeight: '700',
-        color: '#64748b',
-    },
-    filterTextActive: {
-        color: 'white',
-    },
-    floatingActions: {
-        position: 'absolute',
-        right: 20,
-        gap: 12,
-    },
+    filterChipActive: { backgroundColor: '#1e293b' },
+    colorDot: { width: 8, height: 8, borderRadius: 4, marginRight: 6 },
+    filterText: { fontSize: 12, fontWeight: '700', color: '#64748b' },
+    filterTextActive: { color: 'white' },
+    floatingActions: { position: 'absolute', right: 20, gap: 12 },
     actionBtn: {
         width: 60,
         height: 60,
