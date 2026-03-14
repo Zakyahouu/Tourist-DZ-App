@@ -1,50 +1,141 @@
-# Welcome to your Expo app 👋
+# TouristDZ Mobile
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+TouristDZ Mobile is the Expo and React Native client for the TouristDZ platform. It is built for tourists exploring Biskra, Algeria, with a mobile-first experience for discovering tourist sites, events, audio guides, gallery content, QR-based navigation, and authenticated user actions such as favorites and reviews.
 
-## Get started
+## Tech Stack
 
-1. Install dependencies
+- Expo 54
+- React Native 0.81
+- Expo Router
+- Supabase
+- i18next
+- TypeScript
 
-   ```bash
-   npm install
-   ```
+## Main Features
 
-2. Start the app
+- Home screen with featured places and upcoming events
+- Explore tourist sites by category
+- Site details with images, reviews, and audio guide support
+- Event browsing and event details
+- QR scanner flow for quick site access
+- User authentication with Supabase
+- Favorites support
+- Gallery integration
+- Multi-language support
+- Safe-area aware mobile UI
 
-   ```bash
-   npx expo start
-   ```
+## Project Structure
 
-In the output, you'll find options to open the app in a
+- `app/`
+   - Expo Router screens and routes
+   - `(auth)/` authentication screens
+   - `(tabs)/` main tab navigation
+   - `site/`, `event/`, and `accommodation/` detail pages
+   - `scanner.tsx` QR scanner screen
+- `src/context/`
+   - authentication state management
+- `src/lib/`
+   - Supabase client setup
+- `src/i18n/`
+   - translations and language configuration
+- `components/`
+   - reusable UI building blocks
+- `assets/`
+   - app images and icons
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+## Requirements
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+- Node.js 18 or newer
+- npm
+- Android Studio emulator, a physical Android device, or iOS simulator on macOS
 
-## Get a fresh project
+## Environment Variables
 
-When you're ready, run:
+Create a `.env` file in the `mobile` folder:
+
+```env
+EXPO_PUBLIC_SUPABASE_URL=your_supabase_project_url
+EXPO_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+```
+
+The mobile app reads these values through Expo public environment variables.
+
+## Installation
 
 ```bash
+npm install
+```
+
+## Available Scripts
+
+```bash
+npm run start
+npm run android
+npm run ios
+npm run web
+npm run lint
 npm run reset-project
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+## Running the App
 
-## Learn more
+Start the Expo development server:
 
-To learn more about developing your project with Expo, look at the following resources:
+```bash
+npm run start
+```
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+Run on Android:
 
-## Join the community
+```bash
+npm run android
+```
 
-Join our community of developers creating universal apps.
+Run on iOS:
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+```bash
+npm run ios
+```
+
+Run Expo web mode:
+
+```bash
+npm run web
+```
+
+Lint the project:
+
+```bash
+npm run lint
+```
+
+## Supabase Usage
+
+The app uses Supabase for:
+
+- authentication
+- profile loading
+- tourist sites
+- events
+- favorites
+- reviews
+- gallery data
+
+The client is configured in `src/lib/supabase.ts` and persists sessions using AsyncStorage.
+
+## Permissions and Native Notes
+
+- Android audio recording permission is declared
+- Image picker access is configured for gallery uploads
+- Expo build properties are configured to avoid Android packaging conflicts for `libworklets.so`
+
+## Notes
+
+- The app uses Expo Router file-based navigation
+- Supabase auth sessions are persisted locally on the device
+- The QR scanner flow is part of the mobile visitor experience
+- The project is configured for EAS through Expo app metadata
+
+## License
+
+Private project.
