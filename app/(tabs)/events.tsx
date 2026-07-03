@@ -8,15 +8,6 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/src/context/AuthContext';
 import logger from '@/src/utils/logger';
 
-const EVENT_CATEGORIES = [
-    { id: 'all', labelKey: 'categories.all' },
-    { id: 'tour', labelKey: 'events.types.tour' },
-    { id: 'camp', labelKey: 'events.types.camp' },
-    { id: 'competition', labelKey: 'events.types.competition' },
-    { id: 'volunteer', labelKey: 'events.types.volunteer' },
-    { id: 'cultural', labelKey: 'categories.cultural' },
-];
-
 export default function EventsScreen() {
     const insets = useSafeAreaInsets();
     const router = useRouter();
@@ -24,6 +15,7 @@ export default function EventsScreen() {
     const { user } = useAuth();
     const lang = i18n.language || 'fr';
     const [events, setEvents] = useState<any[]>([]);
+    const [categories, setCategories] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState('all');
     const [searchQuery, setSearchQuery] = useState('');
@@ -40,7 +32,7 @@ export default function EventsScreen() {
                 .order('start_date', { ascending: true });
 
             if (filter !== 'all') {
-                query = query.eq('type', filter);
+                query = query.eq('category_id', filter);
             }
 
             const { data, error } = await query;
@@ -62,8 +54,19 @@ export default function EventsScreen() {
     }, [filter, user]);
 
     useEffect(() => {
+        supabase.from('event_categories').select('*').order('sort_order').then(({ data }) => {
+            if (data) setCategories(data);
+        });
+    }, []);
+
+    useEffect(() => {
         fetchEvents();
     }, [fetchEvents]);
+
+    const catLabel = (cat: any) => {
+        if (!cat) return '—';
+        return cat[`name_${lang}`] || cat.name_en || cat.id;
+    };
 
     const filteredEvents = searchQuery.trim()
         ? events.filter(e => {
@@ -107,7 +110,7 @@ export default function EventsScreen() {
                     </View>
                 </ImageBackground>
                 <View style={styles.eventCardInfo}>
-                    <Text style={styles.eventCategory}>{(item.type || '').toUpperCase()}</Text>
+                    <Text style={styles.eventCategory}>{catLabel(categories.find((c: any) => c.id === item.category_id))}</Text>
                     <Text style={styles.eventCardTitle} numberOfLines={2}>{item.title?.[lang] || item.title?.fr}</Text>
                     <View style={styles.eventDetails}>
                         <View style={styles.detailItem}>
@@ -150,14 +153,14 @@ export default function EventsScreen() {
 
             {/* Category Filter */}
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ flexGrow: 0 }} contentContainerStyle={styles.filterRow}>
-                {EVENT_CATEGORIES.map(cat => (
+                {[{ id: 'all', labelKey: 'categories.all' }, ...categories].map(cat => (
                     <TouchableOpacity
                         key={cat.id}
                         style={[styles.filterChip, filter === cat.id && styles.filterChipActive]}
                         onPress={() => setFilter(cat.id)}
                     >
                         <Text style={[styles.filterText, filter === cat.id && styles.filterTextActive]}>
-                            {t(cat.labelKey)}
+                            {cat.labelKey ? t(cat.labelKey) : catLabel(cat)}
                         </Text>
                     </TouchableOpacity>
                 ))}

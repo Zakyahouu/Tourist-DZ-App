@@ -146,7 +146,7 @@ export default function HomeScreen() {
             </TouchableOpacity>
           </View>
 
-          <Text style={styles.heroTitle}>{t('Tourist DZ')} {"\n"}<Text style={styles.accentText}>Biskra</Text></Text>
+          <Text style={styles.heroTitle}>ZibanGo {"\n"}<Text style={styles.accentText}>Biskra</Text></Text>
 
           <View style={styles.searchContainer}>
             <Search size={20} stroke="#64748b" style={styles.searchIcon} />

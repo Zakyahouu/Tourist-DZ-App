@@ -1,59 +1,63 @@
-/**
- * Below are the colors that are used in the app. The colors are defined in the light and dark mode.
- * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://reactnativeunistyles.vercel.app), etc.
- */
-
 import { Platform } from 'react-native';
-
-const tintColorLight = '#f97316'; // Brand Accent (Orange)
-const tintColorDark = '#f97316';
 
 export const Colors = {
   light: {
-    text: '#1e293b', // Deep Blue Text
-    background: '#f8fafc', // Light Gray/White Background
-    tint: tintColorLight,
+    text: '#1e293b',
+    background: '#F8F7F4',
+    tint: '#D6A64C',
     icon: '#64748b',
     tabIconDefault: '#64748b',
-    tabIconSelected: tintColorLight,
-    primary: '#1e293b',
-    secondary: '#334155',
-    accent: '#f97316',
+    tabIconSelected: '#D6A64C',
+    primary: '#1F5B3A',
+    secondary: '#4C8B5B',
+    accent: '#D6A64C',
+    bronze: '#A97B43',
+    card: '#FFFFFF',
   },
   dark: {
     text: '#f8fafc',
     background: '#0f172a',
-    tint: tintColorDark,
+    tint: '#D6A64C',
     icon: '#94a3b8',
     tabIconDefault: '#94a3b8',
-    tabIconSelected: tintColorDark,
-    primary: '#1e293b',
-    secondary: '#334155',
-    accent: '#f97316',
+    tabIconSelected: '#D6A64C',
+    primary: '#1F5B3A',
+    secondary: '#4C8B5B',
+    accent: '#D6A64C',
+    bronze: '#A97B43',
+    card: '#1e293b',
   },
 };
 
 export const Fonts = Platform.select({
   ios: {
-    /** iOS `UIFontDescriptorSystemDesignDefault` */
-    sans: 'system-ui',
-    /** iOS `UIFontDescriptorSystemDesignSerif` */
+    sans: 'Poppins',
+    sansMedium: 'Poppins-Medium',
+    sansSemiBold: 'Poppins-SemiBold',
+    sansBold: 'Poppins-Bold',
+    arabic: 'Cairo',
+    arabicBold: 'Cairo-Bold',
     serif: 'ui-serif',
-    /** iOS `UIFontDescriptorSystemDesignRounded` */
-    rounded: 'ui-rounded',
-    /** iOS `UIFontDescriptorSystemDesignMonospaced` */
     mono: 'ui-monospace',
   },
   default: {
-    sans: 'normal',
+    sans: 'Poppins',
+    sansMedium: 'Poppins-Medium',
+    sansSemiBold: 'Poppins-SemiBold',
+    sansBold: 'Poppins-Bold',
+    arabic: 'Cairo',
+    arabicBold: 'Cairo-Bold',
     serif: 'serif',
-    rounded: 'normal',
     mono: 'monospace',
   },
   web: {
-    sans: "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
+    sans: "'Poppins', system-ui, -apple-system, sans-serif",
+    sansMedium: "'Poppins-Medium', system-ui, -apple-system, sans-serif",
+    sansSemiBold: "'Poppins-SemiBold', system-ui, -apple-system, sans-serif",
+    sansBold: "'Poppins-Bold', system-ui, -apple-system, sans-serif",
+    arabic: "'Cairo', system-ui, sans-serif",
+    arabicBold: "'Cairo-Bold', system-ui, sans-serif",
     serif: "Georgia, 'Times New Roman', serif",
-    rounded: "'SF Pro Rounded', 'Hiragino Maru Gothic ProN', Meiryo, 'MS PGothic', sans-serif",
     mono: "SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace",
   },
 });

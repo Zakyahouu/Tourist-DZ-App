@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, ScrollView, Image, ActivityIndicator, Alert } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '@/src/context/AuthContext';
-import { User, Settings, Heart, Calendar, LogOut, ChevronRight, Share2, Shield, Star } from 'lucide-react-native';
+import { User, Settings, Heart, Calendar, LogOut, ChevronRight, Share2, Shield, Star, List } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { supabase } from '@/src/lib/supabase';
@@ -94,7 +94,7 @@ export default function ProfileScreen() {
 
                 <View style={styles.guestMenu}>
                     <MenuItem icon={Settings} title={t('profile.generalSettings')} color="#64748b" onPress={() => Alert.alert(t('profile.generalSettings'), t('profile.comingSoon'))} />
-                    <MenuItem icon={Share2} title={t('profile.aboutProject')} color="#64748b" onPress={() => Alert.alert('TouristDZ', t('profile.aboutProjectDesc'))} />
+                    <MenuItem icon={Share2} title={t('profile.aboutProject')} color="#64748b" onPress={() => Alert.alert('ZibanGo', t('profile.aboutProjectDesc'))} />
                 </View>
 
                 <View style={[styles.section, { paddingHorizontal: 20, paddingTop: 10 }]}>
@@ -163,7 +163,8 @@ export default function ProfileScreen() {
             <View style={styles.section}>
                 <Text style={styles.sectionTitle}>{t('profile.myActivity')}</Text>
                 <MenuItem icon={Heart} title={t('profile.myFavorites')} color="#ef4444" onPress={() => Alert.alert(t('profile.favorites'), t('profile.comingSoon'))} />
-                <MenuItem icon={Calendar} title={t('profile.myEvents')} color="#3b82f6" onPress={() => Alert.alert(t('profile.events'), t('profile.comingSoon'))} />
+                <MenuItem icon={Calendar} title={t('profile.myEvents')} color="#3b82f6" onPress={() => router.push('/bookings')} />
+                <MenuItem icon={List} title="My Bookings" color="#0891b2" onPress={() => router.push('/bookings')} />
                 <MenuItem icon={Star} title={t('profile.myReviews')} color="#f59e0b" onPress={() => Alert.alert(t('profile.reviews'), t('profile.comingSoon'))} />
                 <MenuItem icon={Heart} title={t('solidarity.title')} color="#e11d48" onPress={() => router.push('/solidarity')} />
             </View>

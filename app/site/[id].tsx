@@ -109,7 +109,7 @@ export default function SiteDetailScreen() {
 
     const handleShare = async () => {
         const siteName = site?.name?.[lang] || site?.name?.fr || 'Tourist Site';
-        const url = `https://touristdz.com/site/${id}`;
+        const url = `https://zibango.dz/site/${id}`;
         try {
             if (await Sharing.isAvailableAsync()) {
                 await Sharing.shareAsync(url, { dialogTitle: siteName });

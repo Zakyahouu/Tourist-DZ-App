@@ -1,6 +1,6 @@
-# TouristDZ Mobile
+# ZibanGo Mobile
 
-TouristDZ Mobile is the Expo and React Native client for the TouristDZ platform. It is built for tourists exploring Biskra, Algeria, with a mobile-first experience for discovering tourist sites, events, audio guides, gallery content, QR-based navigation, and authenticated user actions such as favorites and reviews.
+ZibanGo Mobile is the Expo and React Native client for the ZibanGo platform. It is built for tourists exploring Biskra, Algeria, with a mobile-first experience for discovering tourist sites, events, audio guides, gallery content, QR-based navigation, and authenticated user actions such as favorites and reviews.
 
 ## Tech Stack
 

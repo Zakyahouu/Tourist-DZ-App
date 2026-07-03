@@ -38,6 +38,7 @@ export default function EventDetailScreen() {
     const lang = i18n.language || 'fr';
 
     const [event, setEvent] = useState<any>(null);
+    const [category, setCategory] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [isRegistered, setIsRegistered] = useState(false);
     const [registering, setRegistering] = useState(false);
@@ -50,7 +51,14 @@ export default function EventDetailScreen() {
                 .eq('id', id)
                 .single();
 
-            if (data) setEvent(data);
+            if (data) {
+                setEvent(data);
+                if (data.category_id) {
+                    supabase.from('event_categories').select('*').eq('id', data.category_id).single().then(({ data: cat }) => {
+                        if (cat) setCategory(cat);
+                    });
+                }
+            }
             if (error) logger.error('Error fetching event details:', error);
         } catch (error) {
             logger.error('Fetch error:', error);
@@ -161,7 +169,7 @@ export default function EventDetailScreen() {
                     <View style={styles.titleSection}>
                         <View style={styles.tagRow}>
                             <View style={styles.typeBadge}>
-                                <Text style={styles.typeText}>{(event.type || '').toUpperCase()}</Text>
+                                <Text style={styles.typeText}>{((category?.[`name_${lang}`] || category?.name_en || event.category_id || '') as string).toUpperCase()}</Text>
                             </View>
                             {event.is_solidarity && (
                                 <View style={styles.solidarityBadge}>

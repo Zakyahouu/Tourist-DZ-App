@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "TouristDZ",
-    "slug": "touristdz",
+    "name": "ZibanGo",
+    "slug": "zibango",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "touristdz",
+    "scheme": "zibango",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
@@ -23,7 +23,7 @@
       "permissions": [
         "android.permission.RECORD_AUDIO"
       ],
-      "package": "com.boucettazakaria.touristdz"
+      "package": "com.boucettazakaria.zibango"
     },
     "web": {
       "output": "static",
@@ -34,7 +34,7 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "TouristDZ needs access to your photos to upload gallery images."
+          "photosPermission": "ZibanGo needs access to your photos to upload gallery images."
         }
       ],
       [

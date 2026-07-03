@@ -6,7 +6,7 @@ const resources = {
     en: {
         translation: {
             "app": {
-                "title": "TouristDZ",
+                "title": "ZibanGo",
                 "tagline": "Discover Biskra",
                 "login": "Login",
                 "signup": "Sign Up",
@@ -17,7 +17,7 @@ const resources = {
                 "dontHaveAccount": "Don't have an account?",
                 "alreadyHaveAccount": "Already have an account?",
                 "createAccount": "Create Account",
-                "joinCommunity": "Join the TouristDZ community",
+                "joinCommunity": "Join the ZibanGo community",
                 "fullName": "Full Name"
             },
             "nav": {
@@ -196,7 +196,7 @@ const resources = {
     fr: {
         translation: {
             "app": {
-                "title": "TouristDZ",
+                "title": "ZibanGo",
                 "tagline": "Découvrez Biskra",
                 "login": "Connexion",
                 "signup": "S'inscrire",
@@ -207,7 +207,7 @@ const resources = {
                 "dontHaveAccount": "Vous n'avez pas de compte ?",
                 "alreadyHaveAccount": "Vous avez déjà un compte ?",
                 "createAccount": "Créer un compte",
-                "joinCommunity": "Rejoignez la communauté TouristDZ",
+                "joinCommunity": "Rejoignez la communauté ZibanGo",
                 "fullName": "Nom complet"
             },
             "nav": {
@@ -386,7 +386,7 @@ const resources = {
     ar: {
         translation: {
             "app": {
-                "title": "TouristDZ",
+                "title": "ZibanGo",
                 "tagline": "اكتشف بسكرة",
                 "login": "تسجيل الدخول",
                 "signup": "إنشاء حساب",
@@ -397,7 +397,7 @@ const resources = {
                 "dontHaveAccount": "ليس لديك حساب؟",
                 "alreadyHaveAccount": "لديك حساب بالفعل؟",
                 "createAccount": "إنشاء حساب",
-                "joinCommunity": "انضم إلى مجتمع TouristDZ",
+                "joinCommunity": "انضم إلى مجتمع ZibanGo",
                 "fullName": "الاسم الكامل"
             },
             "nav": {
