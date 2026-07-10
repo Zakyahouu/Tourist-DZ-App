@@ -13,6 +13,7 @@ import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
     ArrowLeft,
+    ArrowRight,
     Calendar,
     MapPin,
     CheckCircle2,
@@ -31,6 +32,7 @@ export default function BookingsScreen() {
     const { t, i18n } = useTranslation();
     const { user } = useAuth();
     const lang = i18n.language || 'fr';
+    const rtl = lang === 'ar';
 
     const [eventRegistrations, setEventRegistrations] = useState([]);
     const [accommodationRequests, setAccommodationRequests] = useState([]);
@@ -76,12 +78,12 @@ export default function BookingsScreen() {
 
     const handleCancelEvent = async (registrationId) => {
         Alert.alert(
-            'Cancel Registration',
-            'Are you sure you want to cancel your registration for this event?',
+            t('profile.cancelRegistration'),
+            t('profile.cancelConfirm'),
             [
                 { text: t('common.cancel'), style: 'cancel' },
                 {
-                    text: 'Yes, Cancel',
+                    text: t('profile.yesCancel'),
                     style: 'destructive',
                     onPress: async () => {
                         try {
@@ -95,7 +97,7 @@ export default function BookingsScreen() {
                             );
                         } catch (err) {
                             logger.error(err);
-                            Alert.alert(t('common.error'), 'Could not cancel registration.');
+                            Alert.alert(t('common.error'), t('profile.cancelFailed'));
                         }
                     },
                 },
@@ -113,7 +115,7 @@ export default function BookingsScreen() {
             setAnnouncementsModal({ event: evt, announcements: data || [] });
         } catch (err) {
             logger.error(err);
-            Alert.alert(t('common.error'), 'Failed to load announcements.');
+            Alert.alert(t('common.error'), t('profile.loadAnnouncementsFailed'));
         }
     };
 
@@ -154,7 +156,7 @@ export default function BookingsScreen() {
     if (loading) {
         return (
             <View style={[styles.container, styles.center]}>
-                <ActivityIndicator size="large" color="#1e293b" />
+                <ActivityIndicator size="large" color="#1F5B3A" />
             </View>
         );
     }
@@ -162,31 +164,31 @@ export default function BookingsScreen() {
     const hasData = eventRegistrations.length > 0 || accommodationRequests.length > 0;
 
     return (
-        <View style={{ flex: 1 }}>
+        <View style={{ flex: 1, direction: rtl ? 'rtl' : 'ltr' }}>
             <ScrollView
                 style={styles.container}
                 contentContainerStyle={[styles.content, { paddingTop: insets.top + 16 }]}
             >
                 <View style={styles.header}>
                     <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-                        <ArrowLeft size={22} stroke="#1e293b" />
+                        {rtl ? <ArrowRight size={22} stroke="#1F5B3A" /> : <ArrowLeft size={22} stroke="#1F5B3A" />}
                     </TouchableOpacity>
-                    <Text style={styles.title}>My Bookings</Text>
+                    <Text style={styles.title}>{t('profile.bookings')}</Text>
                 </View>
 
                 {!hasData ? (
                     <View style={styles.emptyContainer}>
                         <Calendar size={48} stroke="#cbd5e1" />
-                        <Text style={styles.emptyTitle}>No bookings yet</Text>
+                        <Text style={styles.emptyTitle}>{t('profile.noBookingsTitle')}</Text>
                         <Text style={styles.emptySubtitle}>
-                            Register for events or request accommodation to see them here.
+                            {t('profile.noBookingsSubtitle')}
                         </Text>
                     </View>
                 ) : (
                     <>
                         {eventRegistrations.length > 0 && (
                             <View style={styles.section}>
-                                <Text style={styles.sectionTitle}>Event Registrations</Text>
+                                <Text style={styles.sectionTitle}>{t('profile.eventRegistrations')}</Text>
                                 {eventRegistrations.map((reg) => {
                                     const evt = reg.events;
                                     if (!evt) return null;
@@ -254,7 +256,7 @@ export default function BookingsScreen() {
                                                     >
                                                         <Bell size={14} stroke="#0891b2" />
                                                         <Text style={styles.announceBtnText}>
-                                                            Announcements
+                                                            {t('profile.announcements')}
                                                         </Text>
                                                     </TouchableOpacity>
                                                 )}
@@ -265,7 +267,7 @@ export default function BookingsScreen() {
                                                     }
                                                 >
                                                     <Text style={styles.cancelBtnText}>
-                                                        Cancel
+                                                        {t('profile.cancelRegistration')}
                                                     </Text>
                                                 </TouchableOpacity>
                                             </View>
@@ -278,7 +280,7 @@ export default function BookingsScreen() {
                         {accommodationRequests.length > 0 && (
                             <View style={styles.section}>
                                 <Text style={styles.sectionTitle}>
-                                    Accommodation Requests
+                                    {t('profile.accommodationRequests')}
                                 </Text>
                                 {accommodationRequests.map((req) => {
                                     const acc = req.accommodations;
@@ -365,8 +367,8 @@ export default function BookingsScreen() {
                             <Text style={styles.modalTitle}>
                                 {announcementsModal?.event?.title?.[lang] ||
                                     announcementsModal?.event?.title?.fr ||
-                                    'Event'}{' '}
-                                Announcements
+                                    ''}{' '}
+                                {t('profile.announcements')}
                             </Text>
                             <TouchableOpacity
                                 onPress={() => setAnnouncementsModal(null)}
@@ -377,7 +379,7 @@ export default function BookingsScreen() {
                         </View>
                         {announcementsModal?.announcements?.length === 0 ? (
                             <Text style={styles.noAnnouncements}>
-                                No announcements yet.
+                                {t('profile.noAnnouncements')}
                             </Text>
                         ) : (
                             <ScrollView style={styles.announcementsList}>
@@ -405,7 +407,7 @@ export default function BookingsScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#f8fafc',
+        backgroundColor: '#F8F7F4',
     },
     center: {
         justifyContent: 'center',
@@ -437,7 +439,7 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 24,
         fontWeight: '900',
-        color: '#1e293b',
+        color: '#1F5B3A',
     },
     emptyContainer: {
         alignItems: 'center',
@@ -448,7 +450,7 @@ const styles = StyleSheet.create({
     emptyTitle: {
         fontSize: 18,
         fontWeight: '900',
-        color: '#1e293b',
+        color: '#1F5B3A',
     },
     emptySubtitle: {
         fontSize: 14,
@@ -519,7 +521,7 @@ const styles = StyleSheet.create({
     cardTitle: {
         fontSize: 16,
         fontWeight: '800',
-        color: '#1e293b',
+        color: '#1F5B3A',
         marginBottom: 6,
     },
     cardMeta: {
@@ -605,7 +607,7 @@ const styles = StyleSheet.create({
     modalTitle: {
         fontSize: 18,
         fontWeight: '900',
-        color: '#1e293b',
+        color: '#1F5B3A',
         flex: 1,
         marginRight: 12,
     },
@@ -616,7 +618,7 @@ const styles = StyleSheet.create({
         maxHeight: 400,
     },
     announcementItem: {
-        backgroundColor: '#f8fafc',
+        backgroundColor: '#F8F7F4',
         borderRadius: 14,
         padding: 14,
         marginBottom: 10,
@@ -626,7 +628,7 @@ const styles = StyleSheet.create({
     announcementMessage: {
         fontSize: 14,
         fontWeight: '600',
-        color: '#1e293b',
+        color: '#1F5B3A',
         lineHeight: 20,
     },
     announcementDate: {

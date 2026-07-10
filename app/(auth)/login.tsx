@@ -165,7 +165,7 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 32,
         fontWeight: '900',
-        color: '#1e293b',
+        color: '#1F5B3A',
         letterSpacing: -1,
     },
     subtitle: {
@@ -180,7 +180,7 @@ const styles = StyleSheet.create({
     inputContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: '#f8fafc',
+        backgroundColor: '#F8F7F4',
         borderRadius: 16,
         marginBottom: 16,
         paddingHorizontal: 16,
@@ -194,7 +194,7 @@ const styles = StyleSheet.create({
     input: {
         flex: 1,
         fontSize: 16,
-        color: '#1e293b',
+        color: '#1F5B3A',
         fontWeight: '600',
     },
     forgotBtn: {
@@ -202,12 +202,12 @@ const styles = StyleSheet.create({
         marginBottom: 24,
     },
     forgotText: {
-        color: '#f97316',
+        color: '#D6A64C',
         fontWeight: '700',
         fontSize: 14,
     },
     loginBtn: {
-        backgroundColor: '#1e293b',
+        backgroundColor: '#1F5B3A',
         height: 60,
         borderRadius: 16,
         flexDirection: 'row',
@@ -239,7 +239,7 @@ const styles = StyleSheet.create({
         fontWeight: '600',
     },
     signupText: {
-        color: '#1e293b',
+        color: '#1F5B3A',
         fontWeight: '800',
         fontSize: 14,
     },

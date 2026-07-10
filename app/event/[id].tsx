@@ -15,6 +15,7 @@ import { useAuth } from '../../src/context/AuthContext';
 import { useTranslation } from 'react-i18next';
 import {
     ArrowLeft,
+    ArrowRight,
     MapPin,
     Users,
     Calendar,
@@ -36,6 +37,7 @@ export default function EventDetailScreen() {
     const insets = useSafeAreaInsets();
     const { t, i18n } = useTranslation();
     const lang = i18n.language || 'fr';
+    const rtl = lang === 'ar';
 
     const [event, setEvent] = useState<any>(null);
     const [category, setCategory] = useState<any>(null);
@@ -123,7 +125,7 @@ export default function EventDetailScreen() {
     if (loading) {
         return (
             <View style={styles.loadingContainer}>
-                <ActivityIndicator size="large" color="#f97316" />
+                <ActivityIndicator size="large" color="#D6A64C" />
             </View>
         );
     }
@@ -145,12 +147,12 @@ export default function EventDetailScreen() {
     const year = date.getFullYear();
 
     return (
-        <View style={styles.container}>
+        <View style={[styles.container]}>
             <ScrollView showsVerticalScrollIndicator={false}>
                 {/* Hero section */}
                 <View style={styles.heroContainer}>
                     <Image
-                        source={{ uri: event.image_url || 'https://images.unsplash.com/photo-1549487535-61df1f822aa7?auto=format&fit=crop&q=80&w=2670' }}
+                        source={event.image_url ? { uri: event.image_url } : require('../../assets/images/small_panner.jpg')}
                         style={styles.heroImage}
                         contentFit="cover"
                         transition={500}
@@ -160,7 +162,7 @@ export default function EventDetailScreen() {
                             onPress={() => router.back()}
                             style={styles.circleBtn}
                         >
-                            <ArrowLeft size={22} stroke="#1e293b" />
+                            {rtl ? <ArrowRight size={22} stroke="#1F5B3A" /> : <ArrowLeft size={22} stroke="#1F5B3A" />}
                         </TouchableOpacity>
                     </View>
                 </View>
@@ -184,7 +186,7 @@ export default function EventDetailScreen() {
                     <View style={styles.infoGrid}>
                         <View style={styles.infoItem}>
                             <View style={[styles.infoIcon, { backgroundColor: '#fff7ed' }]}>
-                                <Calendar size={20} stroke="#f97316" />
+                                <Calendar size={20} stroke="#D6A64C" />
                             </View>
                             <View>
                                 <Text style={styles.infoLabel}>{t('events.date')}</Text>
@@ -224,7 +226,7 @@ export default function EventDetailScreen() {
                         <View style={styles.audioCard}>
                             <View style={styles.audioInfo}>
                                 <View style={[styles.audioIcon, { backgroundColor: '#fff7ed' }]}>
-                                    <Headphones size={20} stroke="#f97316" />
+                                    <Headphones size={20} stroke="#D6A64C" />
                                 </View>
                                 <View>
                                     <Text style={styles.audioTitle}>{t('features.audioGuideTitle')}</Text>
@@ -302,7 +304,7 @@ const styles = StyleSheet.create({
         marginBottom: 20,
     },
     backBtn: {
-        backgroundColor: '#1e293b',
+        backgroundColor: '#1F5B3A',
         paddingHorizontal: 20,
         paddingVertical: 10,
         borderRadius: 10,
@@ -381,7 +383,7 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 28,
         fontWeight: '900',
-        color: '#1e293b',
+        color: '#1F5B3A',
         letterSpacing: -0.5,
     },
     infoGrid: {
@@ -394,7 +396,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         width: '100%',
-        backgroundColor: '#f8fafc',
+        backgroundColor: '#F8F7F4',
         padding: 16,
         borderRadius: 20,
         gap: 12,
@@ -417,7 +419,7 @@ const styles = StyleSheet.create({
     infoValue: {
         fontSize: 15,
         fontWeight: '700',
-        color: '#1e293b',
+        color: '#1F5B3A',
     },
     section: {
         marginBottom: 32,
@@ -425,7 +427,7 @@ const styles = StyleSheet.create({
     sectionTitle: {
         fontSize: 20,
         fontWeight: '800',
-        color: '#1e293b',
+        color: '#1F5B3A',
         marginBottom: 12,
     },
     description: {
@@ -438,7 +440,7 @@ const styles = StyleSheet.create({
         marginTop: 10,
     },
     registerBtn: {
-        backgroundColor: '#1e293b',
+        backgroundColor: '#1F5B3A',
         height: 64,
         borderRadius: 20,
         flexDirection: 'row',
@@ -463,7 +465,7 @@ const styles = StyleSheet.create({
         fontWeight: '900',
     },
     audioCard: {
-        backgroundColor: '#f8fafc',
+        backgroundColor: '#F8F7F4',
         borderRadius: 24,
         padding: 16,
         marginBottom: 32,
@@ -489,7 +491,7 @@ const styles = StyleSheet.create({
     audioTitle: {
         fontSize: 14,
         fontWeight: '800',
-        color: '#1e293b',
+        color: '#1F5B3A',
     },
     audioSubtitle: {
         fontSize: 11,
@@ -498,7 +500,7 @@ const styles = StyleSheet.create({
         marginTop: 1,
     },
     playBtn: {
-        backgroundColor: '#1e293b',
+        backgroundColor: '#1F5B3A',
         paddingHorizontal: 16,
         paddingVertical: 8,
         borderRadius: 12,
@@ -512,7 +514,7 @@ const styles = StyleSheet.create({
         fontWeight: '800',
     },
     qrCard: {
-        backgroundColor: '#1e293b',
+        backgroundColor: '#1F5B3A',
         borderRadius: 24,
         padding: 24,
         marginBottom: 32,

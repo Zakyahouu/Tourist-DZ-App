@@ -9,9 +9,24 @@ if (!supabaseUrl || !supabaseAnonKey) {
     throw new Error('Missing EXPO_PUBLIC_SUPABASE_URL or EXPO_PUBLIC_SUPABASE_ANON_KEY environment variables');
 }
 
+const storageAdapter = {
+    getItem: async (key: string) => {
+        try { return await AsyncStorage.getItem(key); }
+        catch { return null; }
+    },
+    setItem: async (key: string, value: string) => {
+        try { await AsyncStorage.setItem(key, value); }
+        catch { }
+    },
+    removeItem: async (key: string) => {
+        try { await AsyncStorage.removeItem(key); }
+        catch { }
+    },
+};
+
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     auth: {
-        storage: AsyncStorage,
+        storage: storageAdapter,
         autoRefreshToken: true,
         persistSession: true,
         detectSessionInUrl: false,

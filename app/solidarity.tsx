@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ArrowLeft, Heart } from 'lucide-react-native';
+import { ArrowLeft, ArrowRight, Heart } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import { supabase } from '../src/lib/supabase';
 import { useAuth } from '../src/context/AuthContext';
@@ -27,8 +27,10 @@ const TRIP_TYPES = ['oasis_walk', 'museum_visit', 'thermal_bath', 'city_tour', '
 export default function SolidarityScreen() {
     const router = useRouter();
     const insets = useSafeAreaInsets();
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const { user } = useAuth();
+    const lang = i18n.language || 'fr';
+    const rtl = lang === 'ar';
 
     const [fullName, setFullName] = useState('');
     const [phone, setPhone] = useState('');
@@ -78,13 +80,13 @@ export default function SolidarityScreen() {
     return (
         <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
             <ScrollView
-                style={styles.container}
+                style={[styles.container, { direction: rtl ? 'rtl' : 'ltr' }]}
                 contentContainerStyle={[styles.content, { paddingTop: insets.top + 16 }]}
                 keyboardShouldPersistTaps="handled"
             >
                 <View style={styles.header}>
                     <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-                        <ArrowLeft size={22} stroke="#1e293b" />
+                        {rtl ? <ArrowRight size={22} stroke="#1F5B3A" /> : <ArrowLeft size={22} stroke="#1F5B3A" />}
                     </TouchableOpacity>
                     <View style={styles.titleRow}>
                         <Heart size={22} stroke="#ef4444" fill="#ef4444" />
@@ -179,7 +181,7 @@ export default function SolidarityScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#f8fafc',
+        backgroundColor: '#F8F7F4',
     },
     content: {
         paddingHorizontal: 20,
@@ -212,7 +214,7 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 24,
         fontWeight: '900',
-        color: '#1e293b',
+        color: '#1F5B3A',
     },
     subtitle: {
         fontSize: 14,
@@ -247,8 +249,8 @@ const styles = StyleSheet.create({
         paddingHorizontal: 14,
         paddingVertical: 12,
         fontSize: 15,
-        color: '#1e293b',
-        backgroundColor: '#f8fafc',
+        color: '#1F5B3A',
+        backgroundColor: '#F8F7F4',
     },
     textArea: {
         minHeight: 80,
@@ -265,11 +267,11 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         paddingHorizontal: 14,
         paddingVertical: 8,
-        backgroundColor: '#f8fafc',
+        backgroundColor: '#F8F7F4',
     },
     catBtnActive: {
-        backgroundColor: '#1e293b',
-        borderColor: '#1e293b',
+        backgroundColor: '#1F5B3A',
+        borderColor: '#1F5B3A',
     },
     tripBtnActive: {
         backgroundColor: '#0d9488',

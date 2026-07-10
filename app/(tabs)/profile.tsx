@@ -18,6 +18,8 @@ export default function ProfileScreen() {
     const insets = useSafeAreaInsets();
     const router = useRouter();
     const { t, i18n } = useTranslation();
+    const lang = i18n.language || 'fr';
+    const rtl = lang === 'ar';
     const { user, profile, signOut, loading } = useAuth();
     const isAdmin = profile?.role === 'admin';
 
@@ -47,7 +49,7 @@ export default function ProfileScreen() {
 
     const displayName = profile?.full_name || user?.email?.split('@')[0] || 'Traveler';
 
-    const MenuItem = ({ icon: Icon, title, onPress, color = '#1e293b' }: any) => (
+    const MenuItem = ({ icon: Icon, title, onPress, color = '#1F5B3A' }: any) => (
         <TouchableOpacity style={styles.menuItem} onPress={onPress}>
             <View style={[styles.menuIconContainer, { backgroundColor: color + '10' }]}>
                 <Icon size={20} stroke={color} />
@@ -60,17 +62,17 @@ export default function ProfileScreen() {
     if (loading) {
         return (
             <View style={[styles.container, styles.center]}>
-                <ActivityIndicator size="large" color="#1e293b" />
+                <ActivityIndicator size="large" color="#1F5B3A" />
             </View>
         );
     }
 
     if (!user) {
         return (
-            <ScrollView style={styles.container} contentContainerStyle={styles.centerContent}>
+            <ScrollView style={[styles.container]} contentContainerStyle={styles.centerContent}>
                 <View style={[styles.guestHeader, { paddingTop: insets.top + 60 }]}>
                     <View style={styles.guestIconCircle}>
-                        <User size={40} stroke="#f97316" />
+                        <User size={40} stroke="#D6A64C" />
                     </View>
                     <Text style={styles.guestTitle}>{t('profile.welcome')} {t('app.title')}</Text>
                     <Text style={styles.guestSubtitle}>{t('profile.guestSubtitle')}</Text>
@@ -120,7 +122,7 @@ export default function ProfileScreen() {
     }
 
     return (
-        <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+        <ScrollView style={[styles.container]} showsVerticalScrollIndicator={false}>
             <View style={[styles.header, { paddingTop: insets.top + 20 }]}>
                 <View style={styles.profileInfo}>
                     <View style={styles.avatarContainer}>
@@ -205,7 +207,7 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#f8fafc',
+        backgroundColor: '#F8F7F4',
     },
     center: {
         justifyContent: 'center',
@@ -249,7 +251,7 @@ const styles = StyleSheet.create({
         width: 32,
         height: 32,
         borderRadius: 16,
-        backgroundColor: '#f97316',
+        backgroundColor: '#D6A64C',
         alignItems: 'center',
         justifyContent: 'center',
         borderWidth: 3,
@@ -258,7 +260,7 @@ const styles = StyleSheet.create({
     userName: {
         fontSize: 24,
         fontWeight: '900',
-        color: '#1e293b',
+        color: '#1F5B3A',
         textTransform: 'capitalize',
     },
     nameRow: {
@@ -267,7 +269,7 @@ const styles = StyleSheet.create({
         gap: 8,
     },
     adminBadge: {
-        backgroundColor: '#1e293b',
+        backgroundColor: '#1F5B3A',
         flexDirection: 'row',
         alignItems: 'center',
         paddingHorizontal: 8,
@@ -304,7 +306,7 @@ const styles = StyleSheet.create({
     statNumber: {
         fontSize: 18,
         fontWeight: '900',
-        color: '#1e293b',
+        color: '#1F5B3A',
     },
     statLabel: {
         fontSize: 12,
@@ -350,7 +352,7 @@ const styles = StyleSheet.create({
         flex: 1,
         fontSize: 16,
         fontWeight: '700',
-        color: '#1e293b',
+        color: '#1F5B3A',
     },
     logoutBtn: {
         flexDirection: 'row',
@@ -392,7 +394,7 @@ const styles = StyleSheet.create({
     guestTitle: {
         fontSize: 24,
         fontWeight: '900',
-        color: '#1e293b',
+        color: '#1F5B3A',
         textAlign: 'center',
         marginBottom: 12,
     },
@@ -409,7 +411,7 @@ const styles = StyleSheet.create({
         marginBottom: 40,
     },
     primaryBtn: {
-        backgroundColor: '#1e293b',
+        backgroundColor: '#1F5B3A',
         height: 56,
         borderRadius: 16,
         justifyContent: 'center',
@@ -430,7 +432,7 @@ const styles = StyleSheet.create({
         borderColor: '#e2e8f0',
     },
     secondaryBtnText: {
-        color: '#1e293b',
+        color: '#1F5B3A',
         fontSize: 16,
         fontWeight: '800',
     },
@@ -451,8 +453,8 @@ const styles = StyleSheet.create({
         borderColor: '#e2e8f0',
     },
     langBtnActive: {
-        backgroundColor: '#1e293b',
-        borderColor: '#1e293b',
+        backgroundColor: '#1F5B3A',
+        borderColor: '#1F5B3A',
     },
     langText: {
         fontSize: 13,

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { StyleSheet, View, Text, ScrollView, TextInput, TouchableOpacity, ImageBackground, ActivityIndicator } from 'react-native';
-import { Search, MapPin, Calendar, Heart, Camera, ChevronRight } from 'lucide-react-native';
+import { StyleSheet, View, Text, ScrollView, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { Search, MapPin, Calendar, Heart, Camera } from 'lucide-react-native';
 import { StatusBar } from 'expo-status-bar';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { supabase } from '@/src/lib/supabase';
@@ -9,7 +9,6 @@ import { useRouter } from 'expo-router';
 import { useAuth } from '@/src/context/AuthContext';
 import logger from '@/src/utils/logger';
 
-const CATEGORIES = ['all', 'historical', 'natural', 'cultural', 'thermal'] as const;
 
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
@@ -17,55 +16,82 @@ export default function HomeScreen() {
   const { t, i18n } = useTranslation();
   const { user } = useAuth();
   const lang = i18n.language || 'fr';
+  const rtl = lang === 'ar';
   const [searchQuery, setSearchQuery] = useState('');
   const [featuredSites, setFeaturedSites] = useState<any[]>([]);
-  const [upcomingEvents, setUpcomingEvents] = useState<any[]>([]);
+  const [allSites, setAllSites] = useState<any[]>([]);
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(false);
+
+  const [categories, setCategories] = useState<any[]>([]);
   const [activeCategory, setActiveCategory] = useState<string>('all');
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [favoriteIds, setFavoriteIds] = useState<Set<string>>(new Set());
+  const PAGE_SIZE = 6;
 
-  const fetchData = useCallback(async () => {
-    setLoading(true);
+  const catLabel = (cat: any) => {
+    if (!cat) return '';
+    return cat[`name_${lang}`] || cat.name_fr || cat.name_en || '';
+  };
+
+  const fetchData = useCallback(async (pageNum = 0, append = false) => {
+    if (pageNum === 0) setLoading(true);
+    else setLoadingMore(true);
     try {
       let sitesQuery = supabase
         .from('tourist_sites')
-        .select('*, site_images(image_url)')
+        .select('*, site_images(image_url)', { count: 'exact' })
         .eq('is_active', true)
-        .limit(6);
+        .range(pageNum * PAGE_SIZE, (pageNum + 1) * PAGE_SIZE - 1)
+        .order('avg_rating', { ascending: false, nullsFirst: false });
 
       if (activeCategory !== 'all') {
-        sitesQuery = sitesQuery.eq('category', activeCategory);
+        sitesQuery = sitesQuery.eq('category_id', activeCategory);
       }
       if (searchQuery.trim()) {
         const q = searchQuery.trim().toLowerCase();
         sitesQuery = sitesQuery.or(`name->>fr.ilike.%${q}%,name->>en.ilike.%${q}%,name->>ar.ilike.%${q}%`);
       }
 
-      const [sitesRes, eventsRes] = await Promise.all([
-        sitesQuery,
-        supabase
-          .from('events')
-          .select('id, title, start_date, type, location, image_url')
-          .eq('is_active', true)
-          .gte('start_date', new Date().toISOString())
-          .order('start_date', { ascending: true })
-          .limit(4),
-      ]);
+      const sitesRes = await sitesQuery;
 
       if (sitesRes.error) logger.error('fetchSites error:', sitesRes.error);
-      if (sitesRes.data) setFeaturedSites(sitesRes.data);
-      if (eventsRes.error) logger.error('fetchEvents error:', eventsRes.error);
-      if (eventsRes.data) setUpcomingEvents(eventsRes.data);
+      if (sitesRes.data) {
+        if (append) {
+          setAllSites(prev => [...prev, ...sitesRes.data]);
+        } else {
+          setAllSites(sitesRes.data);
+        }
+        setFeaturedSites(sitesRes.data);
+        setHasMore(sitesRes.count !== null && (pageNum + 1) * PAGE_SIZE < sitesRes.count);
+      }
     } catch (err) {
       logger.error('fetchData exception:', err);
     } finally {
       setLoading(false);
+      setLoadingMore(false);
     }
   }, [activeCategory, searchQuery]);
 
+  const handleLoadMore = () => {
+    const nextPage = page + 1;
+    setPage(nextPage);
+    fetchData(nextPage, true);
+  };
+
+  // Reset page when category or search changes
   useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+    setPage(0);
+    setAllSites([]);
+    fetchData(0, false);
+  }, [activeCategory, searchQuery]);
+
+  useEffect(() => {
+    supabase.from('site_categories').select('*').order('sort_order').then(({ data }) => {
+      if (data) setCategories(data);
+    });
+  }, []);
 
   const fetchFavorites = useCallback(async () => {
     if (!user) return;
@@ -124,15 +150,11 @@ export default function HomeScreen() {
     : featuredSites;
 
   return (
-    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+    <ScrollView style={[styles.container]} showsVerticalScrollIndicator={false}>
       <StatusBar style="light" />
 
       {/* Hero Section */}
-      <ImageBackground
-        source={{ uri: 'https://images.unsplash.com/photo-1545805553-c454eef7dd45?auto=format&fit=crop&q=80&w=1200' }}
-        style={[styles.hero, { paddingTop: insets.top + 20 }]}
-      >
-        <View style={styles.overlay} />
+      <View style={[styles.hero, styles.heroBg, { paddingTop: insets.top + 20 }]}>
         <View style={styles.heroContent}>
           <View style={styles.heroRow}>
             <View style={styles.badge}>
@@ -159,18 +181,18 @@ export default function HomeScreen() {
             />
           </View>
         </View>
-      </ImageBackground>
+      </View>
 
       {/* Category Filter */}
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.categoryRow}>
-        {CATEGORIES.map(cat => (
+        {[{ id: 'all' }, ...categories].map(cat => (
           <TouchableOpacity
-            key={cat}
-            style={[styles.categoryChip, activeCategory === cat && styles.categoryChipActive]}
-            onPress={() => setActiveCategory(cat)}
+            key={cat.id}
+            style={[styles.categoryChip, activeCategory === cat.id && styles.categoryChipActive]}
+            onPress={() => setActiveCategory(cat.id)}
           >
-            <Text style={[styles.categoryText, activeCategory === cat && styles.categoryTextActive]}>
-              {t(`categories.${cat}`)}
+            <Text style={[styles.categoryText, activeCategory === cat.id && styles.categoryTextActive]}>
+              {cat.id === 'all' ? t('categories.all') : catLabel(cat)}
             </Text>
           </TouchableOpacity>
         ))}
@@ -186,7 +208,7 @@ export default function HomeScreen() {
         </View>
 
         {loading ? (
-          <ActivityIndicator size="small" color="#f97316" style={{ marginVertical: 20 }} />
+          <ActivityIndicator size="small" color="#D6A64C" style={{ marginVertical: 20 }} />
         ) : (
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.horizontalScroll}>
             {filteredSites.map((site) => {
@@ -200,7 +222,7 @@ export default function HomeScreen() {
                 >
                   <View style={styles.cardImageContainer}>
                     <ImageBackground
-                      source={{ uri: site.site_images?.[0]?.image_url || 'https://images.unsplash.com/photo-1549487535-61df1f822aa7?auto=format&fit=crop&q=80&w=600' }}
+                      source={site.site_images?.[0]?.image_url ? { uri: site.site_images[0].image_url } : require('../../assets/images/small_panner.jpg')}
                       style={styles.cardImage}
                     >
                       <TouchableOpacity
@@ -213,10 +235,10 @@ export default function HomeScreen() {
                     </ImageBackground>
                   </View>
                   <View style={styles.cardContent}>
-                    <Text style={styles.cardCategory}>{(site.category || '').toUpperCase()}</Text>
+                    <Text style={styles.cardCategory}>{catLabel(categories.find(c => c.id === site.category_id))}</Text>
                     <Text style={styles.cardName} numberOfLines={1}>{site.name?.[lang] || site.name?.fr}</Text>
                     <View style={styles.cardFooter}>
-                      <MapPin size={14} color="#f97316" />
+                      <MapPin size={14} color="#D6A64C" />
                       <Text style={styles.cardLocation}>Biskra, DZ</Text>
                     </View>
                   </View>
@@ -227,44 +249,7 @@ export default function HomeScreen() {
         )}
       </View>
 
-      {/* Upcoming Events */}
-      {upcomingEvents.length > 0 && (
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>{t('home.upcomingEvents')}</Text>
-            <TouchableOpacity onPress={() => router.push('/events')}>
-              <Text style={styles.seeAllText}>{t('home.viewAll')}</Text>
-            </TouchableOpacity>
-          </View>
-          {upcomingEvents.map(event => {
-            const date = new Date(event.start_date);
-            const day = date.getDate();
-            const month = date.toLocaleString(lang, { month: 'short' });
-            return (
-              <TouchableOpacity
-                key={event.id}
-                style={styles.eventRow}
-                onPress={() => router.push(`/event/${event.id}`)}
-                activeOpacity={0.8}
-              >
-                <View style={styles.eventDate}>
-                  <Text style={styles.eventMonth}>{month}</Text>
-                  <Text style={styles.eventDay}>{day}</Text>
-                </View>
-                <View style={styles.eventInfo}>
-                  <Text style={styles.eventType}>{(event.type || '').toUpperCase()}</Text>
-                  <Text style={styles.eventTitle} numberOfLines={1}>{event.title?.[lang] || event.title?.fr}</Text>
-                  <View style={styles.eventLocationRow}>
-                    <MapPin size={12} color="#64748b" />
-                    <Text style={styles.eventLocation}>{event.location}</Text>
-                  </View>
-                </View>
-                <ChevronRight size={20} color="#94a3b8" />
-              </TouchableOpacity>
-            );
-          })}
-        </View>
-      )}
+
 
       {/* Quick Navigation */}
       <View style={styles.quickNav}>
@@ -295,7 +280,7 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8fafc',
+    backgroundColor: '#F8F7F4',
   },
   hero: {
     height: 400,
@@ -303,9 +288,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     justifyContent: 'flex-start',
   },
-  overlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0,0,0,0.35)',
+  heroBg: {
+    backgroundColor: '#1F5B3A',
   },
   heroContent: {
     zIndex: 1,
@@ -334,7 +318,7 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
   },
   badgeText: {
-    color: '#f97316',
+    color: '#D6A64C',
     fontWeight: '900',
     fontSize: 10,
     letterSpacing: 1,
@@ -347,7 +331,7 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   accentText: {
-    color: '#f97316',
+    color: '#D6A64C',
   },
   searchContainer: {
     flexDirection: 'row',
@@ -368,7 +352,7 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     fontSize: 16,
-    color: '#1e293b',
+    color: '#1F5B3A',
     fontWeight: '600',
   },
   section: {
@@ -384,10 +368,10 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 22,
     fontWeight: '900',
-    color: '#1e293b',
+    color: '#1F5B3A',
   },
   seeAllText: {
-    color: '#f97316',
+    color: '#D6A64C',
     fontWeight: '700',
     fontSize: 14,
   },
@@ -432,14 +416,14 @@ const styles = StyleSheet.create({
   cardCategory: {
     fontSize: 10,
     fontWeight: '800',
-    color: '#f97316',
+    color: '#D6A64C',
     textTransform: 'uppercase',
     marginBottom: 4,
   },
   cardName: {
     fontSize: 16,
     fontWeight: '800',
-    color: '#1e293b',
+    color: '#1F5B3A',
     marginBottom: 8,
   },
   cardFooter: {
@@ -473,7 +457,7 @@ const styles = StyleSheet.create({
   navText: {
     fontSize: 12,
     fontWeight: '800',
-    color: '#1e293b',
+    color: '#1F5B3A',
   },
   categoryRow: {
     paddingHorizontal: 20,
@@ -490,8 +474,8 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   categoryChipActive: {
-    backgroundColor: '#f97316',
-    borderColor: '#f97316',
+    backgroundColor: '#D6A64C',
+    borderColor: '#D6A64C',
   },
   categoryText: {
     fontSize: 13,
@@ -500,64 +484,5 @@ const styles = StyleSheet.create({
   },
   categoryTextActive: {
     color: 'white',
-  },
-  eventRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'white',
-    marginHorizontal: 20,
-    marginBottom: 12,
-    borderRadius: 16,
-    padding: 14,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04,
-    shadowRadius: 8,
-    elevation: 2,
-  },
-  eventDate: {
-    width: 50,
-    height: 54,
-    borderRadius: 14,
-    backgroundColor: '#fff7ed',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 14,
-  },
-  eventMonth: {
-    fontSize: 10,
-    fontWeight: '900',
-    color: '#f97316',
-    textTransform: 'uppercase',
-  },
-  eventDay: {
-    fontSize: 20,
-    fontWeight: '900',
-    color: '#1e293b',
-  },
-  eventInfo: {
-    flex: 1,
-  },
-  eventType: {
-    fontSize: 9,
-    fontWeight: '800',
-    color: '#f97316',
-    marginBottom: 2,
-  },
-  eventTitle: {
-    fontSize: 14,
-    fontWeight: '800',
-    color: '#1e293b',
-    marginBottom: 4,
-  },
-  eventLocationRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  eventLocation: {
-    fontSize: 11,
-    color: '#64748b',
-    fontWeight: '600',
   },
 });

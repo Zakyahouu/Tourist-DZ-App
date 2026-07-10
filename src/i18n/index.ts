@@ -33,7 +33,12 @@ const resources = {
                 "featuredPlaces": "Featured Places",
                 "upcomingEvents": "Upcoming Events",
                 "discoverBiskra": "Discover Biskra",
-                "heroSubtitle": "Explore the Queen of the Ziban"
+                "heroSubtitle": "Explore the Queen of the Ziban",
+                "loadMore": "Load More"
+            },
+            "landing": {
+                "stats_sites": "Sites",
+                "stats_reviews": "Reviews"
             },
             "details": {
                 "about": "About",
@@ -165,6 +170,19 @@ const resources = {
             "profile": {
                 "welcome": "Welcome to",
                 "guestSubtitle": "Join us to save your favorite places and register for unique events in Biskra.",
+                "bookings": "My Bookings",
+                "noBookingsTitle": "No bookings yet",
+                "noBookingsSubtitle": "Register for events or request accommodation to see them here.",
+                "cancelRegistration": "Cancel Registration",
+                "cancelConfirm": "Are you sure you want to cancel your registration for this event?",
+                "yesCancel": "Yes, Cancel",
+                "cancelFailed": "Could not cancel registration.",
+                "eventRegistrations": "Event Registrations",
+                "accommodationRequests": "Accommodation Requests",
+                "announcements": "Announcements",
+                "noAnnouncements": "No announcements yet.",
+                "loadAnnouncementsFailed": "Failed to load announcements.",
+                "photos": "My Photos",
                 "generalSettings": "General Settings",
                 "aboutProject": "About the Project",
                 "aboutProjectDesc": "Smart tourism platform for Biskra, Algeria.",
@@ -223,7 +241,12 @@ const resources = {
                 "featuredPlaces": "Lieux incontournables",
                 "upcomingEvents": "Événements à venir",
                 "discoverBiskra": "Découvrir Biskra",
-                "heroSubtitle": "Explorez la Reine des Ziban"
+                "heroSubtitle": "Explorez la Reine des Ziban",
+                "loadMore": "Voir plus"
+            },
+            "landing": {
+                "stats_sites": "Sites",
+                "stats_reviews": "Avis"
             },
             "details": {
                 "about": "À propos",
@@ -355,6 +378,19 @@ const resources = {
             "profile": {
                 "welcome": "Bienvenue sur",
                 "guestSubtitle": "Rejoignez-nous pour sauvegarder vos lieux préférés et vous inscrire à des événements uniques à Biskra.",
+                "bookings": "Mes réservations",
+                "noBookingsTitle": "Aucune réservation",
+                "noBookingsSubtitle": "Inscrivez-vous à des événements ou demandez un hébergement pour les voir ici.",
+                "cancelRegistration": "Annuler l'inscription",
+                "cancelConfirm": "Êtes-vous sûr de vouloir annuler votre inscription à cet événement ?",
+                "yesCancel": "Oui, annuler",
+                "cancelFailed": "Impossible d'annuler l'inscription.",
+                "eventRegistrations": "Inscriptions aux événements",
+                "accommodationRequests": "Demandes d'hébergement",
+                "announcements": "Annonces",
+                "noAnnouncements": "Aucune annonce pour le moment.",
+                "loadAnnouncementsFailed": "Échec du chargement des annonces.",
+                "photos": "Mes photos",
                 "generalSettings": "Paramètres généraux",
                 "aboutProject": "À propos du projet",
                 "aboutProjectDesc": "Plateforme touristique intelligente pour Biskra, Algérie.",
@@ -413,7 +449,12 @@ const resources = {
                 "featuredPlaces": "أماكن مميزة",
                 "upcomingEvents": "فعاليات قادمة",
                 "discoverBiskra": "اكتشف بسكرة",
-                "heroSubtitle": "استكشف عروس الزيبان"
+                "heroSubtitle": "استكشف عروس الزيبان",
+                "loadMore": "عرض المزيد"
+            },
+            "landing": {
+                "stats_sites": "مواقع",
+                "stats_reviews": "تقييمات"
             },
             "details": {
                 "about": "حول",
@@ -545,6 +586,19 @@ const resources = {
             "profile": {
                 "welcome": "مرحبًا بك في",
                 "guestSubtitle": "انضم إلينا لحفظ أماكنك المفضلة والتسجيل في فعاليات فريدة في بسكرة.",
+                "bookings": "حجوزاتي",
+                "noBookingsTitle": "لا توجد حجوزات بعد",
+                "noBookingsSubtitle": "سجل في الفعاليات أو اطلب إقامة لرؤيتها هنا.",
+                "cancelRegistration": "إلغاء التسجيل",
+                "cancelConfirm": "هل أنت متأكد من إلغاء تسجيلك في هذه الفعالية؟",
+                "yesCancel": "نعم، إلغاء",
+                "cancelFailed": "تعذر إلغاء التسجيل.",
+                "eventRegistrations": "تسجيلات الفعاليات",
+                "accommodationRequests": "طلبات الإقامة",
+                "announcements": "إعلانات",
+                "noAnnouncements": "لا توجد إعلانات بعد.",
+                "loadAnnouncementsFailed": "فشل تحميل الإعلانات.",
+                "photos": "صوري",
                 "generalSettings": "الإعدادات العامة",
                 "aboutProject": "حول المشروع",
                 "aboutProjectDesc": "منصة سياحية ذكية لبسكرة، الجزائر.",

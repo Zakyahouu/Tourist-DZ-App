@@ -1,11 +1,24 @@
 import { Tabs } from 'expo-router';
 import React from 'react';
+import { Image, Platform, View } from 'react-native';
 
 import { HapticTab } from '@/components/haptic-tab';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useTranslation } from 'react-i18next';
+
+function LogoHeader() {
+  return (
+    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'flex-start', paddingLeft: Platform.OS === 'ios' ? 0 : 4 }}>
+      <Image
+        source={require('../../assets/images/logo_with_words.jpeg')}
+        style={{ height: 28, width: 120, resizeMode: 'contain' }}
+        accessibilityLabel="ZibanGo"
+      />
+    </View>
+  );
+}
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
@@ -20,13 +33,17 @@ export default function TabLayout() {
         tabBarStyle: {
           backgroundColor: Colors[colorScheme ?? 'light'].background,
           borderTopWidth: 1,
-          borderTopColor: colorScheme === 'dark' ? '#1e293b' : '#e2e8f0',
+          borderTopColor: colorScheme === 'dark' ? '#1F5B3A' : '#e2e8f0',
         }
       }}>
       <Tabs.Screen
         name="index"
         options={{
           title: t('nav.home'),
+          headerShown: true,
+          headerTitle: () => <LogoHeader />,
+          headerStyle: { backgroundColor: '#F8F7F4' },
+          headerShadowVisible: false,
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
         }}
       />

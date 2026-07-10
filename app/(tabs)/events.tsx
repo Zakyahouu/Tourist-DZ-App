@@ -14,6 +14,7 @@ export default function EventsScreen() {
     const { t, i18n } = useTranslation();
     const { user } = useAuth();
     const lang = i18n.language || 'fr';
+    const rtl = lang === 'ar';
     const [events, setEvents] = useState<any[]>([]);
     const [categories, setCategories] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
@@ -81,7 +82,7 @@ export default function EventsScreen() {
         const date = new Date(item.start_date);
         const day = date.getDate();
         const month = date.toLocaleString(lang, { month: 'short' });
-        const imageUrl = item.image_url || 'https://images.unsplash.com/photo-1549487535-61df1f822aa7?auto=format&fit=crop&q=80&w=800';
+        const imageUrl = item.image_url;
         const isRegistered = registeredEvents.has(item.id);
 
         return (
@@ -91,7 +92,7 @@ export default function EventsScreen() {
                 activeOpacity={0.9}
             >
                 <ImageBackground
-                    source={{ uri: imageUrl }}
+                    source={imageUrl ? { uri: imageUrl } : require('../../assets/images/small_panner.jpg')}
                     style={styles.eventImage}
                     imageStyle={styles.eventImageInner}
                 >
@@ -167,7 +168,7 @@ export default function EventsScreen() {
             </ScrollView>
 
             {loading ? (
-                <ActivityIndicator size="large" color="#f97316" style={{ marginTop: 40 }} />
+                <ActivityIndicator size="large" color="#D6A64C" style={{ marginTop: 40 }} />
             ) : filteredEvents.length === 0 ? (
                 <View style={styles.emptyState}>
                     <Calendar size={48} stroke="#cbd5e1" />
@@ -193,7 +194,7 @@ export default function EventsScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#f8fafc',
+        backgroundColor: '#F8F7F4',
     },
     header: {
         paddingHorizontal: 20,
@@ -202,7 +203,7 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 28,
         fontWeight: '900',
-        color: '#1e293b',
+        color: '#1F5B3A',
     },
     subtitle: {
         fontSize: 14,
@@ -225,7 +226,7 @@ const styles = StyleSheet.create({
     searchInput: {
         flex: 1,
         fontSize: 15,
-        color: '#1e293b',
+        color: '#1F5B3A',
         fontWeight: '600',
     },
     filterRow: {
@@ -244,8 +245,8 @@ const styles = StyleSheet.create({
         marginRight: 6,
     },
     filterChipActive: {
-        backgroundColor: '#f97316',
-        borderColor: '#f97316',
+        backgroundColor: '#D6A64C',
+        borderColor: '#D6A64C',
     },
     filterText: {
         fontSize: 12,
@@ -307,13 +308,13 @@ const styles = StyleSheet.create({
     dateMonth: {
         fontSize: 10,
         fontWeight: '900',
-        color: '#f97316',
+        color: '#D6A64C',
         textTransform: 'uppercase',
     },
     dateDay: {
         fontSize: 22,
         fontWeight: '900',
-        color: '#1e293b',
+        color: '#1F5B3A',
     },
     solidarityBadge: {
         flexDirection: 'row',
@@ -335,14 +336,14 @@ const styles = StyleSheet.create({
     eventCategory: {
         fontSize: 10,
         fontWeight: '800',
-        color: '#f97316',
+        color: '#D6A64C',
         textTransform: 'uppercase',
         marginBottom: 4,
     },
     eventCardTitle: {
         fontSize: 16,
         fontWeight: '800',
-        color: '#1e293b',
+        color: '#1F5B3A',
         marginBottom: 8,
     },
     eventDetails: {
@@ -383,7 +384,7 @@ const styles = StyleSheet.create({
     emptyTitle: {
         fontSize: 18,
         fontWeight: '800',
-        color: '#1e293b',
+        color: '#1F5B3A',
     },
     emptySubtitle: {
         fontSize: 14,

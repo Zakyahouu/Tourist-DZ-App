@@ -15,17 +15,19 @@ export default function ScannerScreen() {
     const [torch, setTorch] = useState(false);
     const router = useRouter();
     const insets = useSafeAreaInsets();
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
+    const lang = i18n.language || 'fr';
+    const rtl = lang === 'ar';
 
     if (!permission) {
         // Camera permissions are still loading.
-        return <View style={styles.container} />;
+        return <View style={[styles.container, { direction: rtl ? 'rtl' : 'ltr' }]} />;
     }
 
     if (!permission.granted) {
         // Camera permissions are not granted yet.
         return (
-            <View style={styles.container}>
+            <View style={[styles.container, { direction: rtl ? 'rtl' : 'ltr' }]}>
                 <View style={[styles.header, { paddingTop: insets.top + 20 }]}>
                     <TouchableOpacity onPress={() => router.back()} style={styles.closeBtn}>
                         <X size={24} color="white" />
@@ -68,7 +70,7 @@ export default function ScannerScreen() {
     };
 
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, { direction: rtl ? 'rtl' : 'ltr' }]}>
             <CameraView
                 style={StyleSheet.absoluteFillObject}
                 onBarcodeScanned={scanned ? undefined : handleBarCodeScanned}
@@ -155,8 +157,8 @@ const styles = StyleSheet.create({
         left: 0,
         right: 0,
         height: 2,
-        backgroundColor: '#f97316',
-        shadowColor: '#f97316',
+        backgroundColor: '#D6A64C',
+        shadowColor: '#D6A64C',
         shadowOffset: { width: 0, height: 0 },
         shadowOpacity: 1,
         shadowRadius: 10,
@@ -186,12 +188,12 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         padding: 40,
-        backgroundColor: '#f8fafc',
+        backgroundColor: '#F8F7F4',
     },
     permissionTitle: {
         fontSize: 24,
         fontWeight: '900',
-        color: '#1e293b',
+        color: '#1F5B3A',
         marginBottom: 12,
         textAlign: 'center',
     },
@@ -203,7 +205,7 @@ const styles = StyleSheet.create({
         marginBottom: 32,
     },
     btn: {
-        backgroundColor: '#1e293b',
+        backgroundColor: '#1F5B3A',
         paddingHorizontal: 30,
         paddingVertical: 15,
         borderRadius: 16,
@@ -218,7 +220,7 @@ const styles = StyleSheet.create({
         position: 'absolute',
         width: 40,
         height: 40,
-        borderColor: '#f97316',
+        borderColor: '#D6A64C',
     },
     topLeft: {
         top: -2,

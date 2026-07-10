@@ -16,6 +16,7 @@ import { useAuth } from '../../src/context/AuthContext';
 import { useTranslation } from 'react-i18next';
 import {
     ArrowLeft,
+    ArrowRight,
     MapPin,
     Star,
     Accessibility,
@@ -38,8 +39,10 @@ export default function SiteDetailScreen() {
     const { t, i18n } = useTranslation();
     const { user } = useAuth();
     const lang = i18n.language || 'fr';
+    const rtl = lang === 'ar';
 
     const [site, setSite] = useState<any>(null);
+    const [category, setCategory] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [isFavorite, setIsFavorite] = useState(false);
     const [favLoading, setFavLoading] = useState(false);
@@ -55,7 +58,14 @@ export default function SiteDetailScreen() {
                 .eq('id', id)
                 .single();
 
-            if (data) setSite(data);
+            if (data) {
+                setSite(data);
+                if (data.category_id) {
+                    supabase.from('site_categories').select('*').eq('id', data.category_id).single().then(({ data: cat }) => {
+                        if (cat) setCategory(cat);
+                    });
+                }
+            }
             if (error) logger.error('Error fetching site details:', error);
         } catch (error) {
             logger.error('Fetch error:', error);
@@ -157,7 +167,7 @@ export default function SiteDetailScreen() {
     if (loading) {
         return (
             <View style={styles.loadingContainer}>
-                <ActivityIndicator size="large" color="#f97316" />
+                <ActivityIndicator size="large" color="#D6A64C" />
             </View>
         );
     }
@@ -174,15 +184,15 @@ export default function SiteDetailScreen() {
     }
 
     const images = site.site_images?.map((img: any) => img.image_url) || [];
-    const coverImage = images[0] || 'https://images.unsplash.com/photo-1549487535-61df1f822aa7?auto=format&fit=crop&q=80&w=2670';
+    const hasCover = images.length > 0;
 
     return (
-        <View style={styles.container}>
+        <View style={[styles.container]}>
             <ScrollView showsVerticalScrollIndicator={false}>
                 {/* Hero section */}
                 <View style={styles.heroContainer}>
                     <Image
-                        source={{ uri: coverImage }}
+                        source={hasCover ? { uri: images[0] } : require('../../assets/images/small_panner.jpg')}
                         style={styles.heroImage}
                         contentFit="cover"
                         transition={500}
@@ -192,15 +202,15 @@ export default function SiteDetailScreen() {
                             onPress={() => router.back()}
                             style={styles.circleBtn}
                         >
-                            <ArrowLeft size={22} stroke="#1e293b" />
+                            {rtl ? <ArrowRight size={22} stroke="#1F5B3A" /> : <ArrowLeft size={22} stroke="#1F5B3A" />}
                         </TouchableOpacity>
 
                         <View style={styles.rightActions}>
                             <TouchableOpacity style={styles.circleBtn} onPress={handleShare}>
-                                <Share2 size={22} stroke="#1e293b" />
+                                <Share2 size={22} stroke="#1F5B3A" />
                             </TouchableOpacity>
                             <TouchableOpacity onPress={toggleFavorite} style={styles.circleBtn} disabled={favLoading}>
-                                <Heart size={22} stroke={isFavorite ? '#ef4444' : '#1e293b'} fill={isFavorite ? '#ef4444' : 'transparent'} />
+                                <Heart size={22} stroke={isFavorite ? '#ef4444' : '#1F5B3A'} fill={isFavorite ? '#ef4444' : 'transparent'} />
                             </TouchableOpacity>
                         </View>
                     </View>
@@ -209,7 +219,7 @@ export default function SiteDetailScreen() {
                 <View style={styles.content}>
                     <View style={styles.titleSection}>
                         <View style={styles.categoryBadge}>
-                            <Text style={styles.categoryText}>{site.category.toUpperCase()}</Text>
+                            <Text style={styles.categoryText}>{(category?.[`name_${lang}`] || category?.name_fr || category?.name_en || '').toUpperCase()}</Text>
                         </View>
                         <Text style={styles.title}>{site.name?.[lang] || site.name?.fr}</Text>
 
@@ -279,7 +289,7 @@ export default function SiteDetailScreen() {
                         <View style={styles.audioCard}>
                             <View style={styles.audioInfo}>
                                 <View style={[styles.audioIcon, { backgroundColor: '#fff7ed' }]}>
-                                    <Headphones size={20} stroke="#f97316" />
+                                    <Headphones size={20} stroke="#D6A64C" />
                                 </View>
                                 <View>
                                     <Text style={styles.audioTitle}>{t('features.audioGuideTitle')}</Text>
@@ -384,7 +394,7 @@ export default function SiteDetailScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#f8fafc',
+        backgroundColor: '#F8F7F4',
     },
     loadingContainer: {
         flex: 1,
@@ -403,7 +413,7 @@ const styles = StyleSheet.create({
         marginBottom: 20,
     },
     backBtn: {
-        backgroundColor: '#1e293b',
+        backgroundColor: '#1F5B3A',
         paddingHorizontal: 20,
         paddingVertical: 10,
         borderRadius: 10,
@@ -446,7 +456,7 @@ const styles = StyleSheet.create({
         elevation: 3,
     },
     content: {
-        backgroundColor: '#f8fafc',
+        backgroundColor: '#F8F7F4',
         borderTopLeftRadius: 30,
         borderTopRightRadius: 30,
         marginTop: -30,
@@ -470,13 +480,13 @@ const styles = StyleSheet.create({
     categoryText: {
         fontSize: 10,
         fontWeight: '900',
-        color: '#f97316',
+        color: '#D6A64C',
         letterSpacing: 1,
     },
     title: {
         fontSize: 28,
         fontWeight: '900',
-        color: '#1e293b',
+        color: '#1F5B3A',
         marginBottom: 8,
         letterSpacing: -0.5,
     },
@@ -488,7 +498,7 @@ const styles = StyleSheet.create({
     ratingText: {
         fontSize: 14,
         fontWeight: '800',
-        color: '#1e293b',
+        color: '#1F5B3A',
     },
     reviewCount: {
         color: '#64748b',
@@ -500,7 +510,7 @@ const styles = StyleSheet.create({
     sectionTitle: {
         fontSize: 20,
         fontWeight: '800',
-        color: '#1e293b',
+        color: '#1F5B3A',
         marginBottom: 12,
     },
     description: {
@@ -555,10 +565,10 @@ const styles = StyleSheet.create({
     infoValue: {
         fontSize: 14,
         fontWeight: '700',
-        color: '#1e293b',
+        color: '#1F5B3A',
     },
     directionsBtn: {
-        backgroundColor: '#1e293b',
+        backgroundColor: '#1F5B3A',
         height: 54,
         borderRadius: 16,
         flexDirection: 'row',
@@ -604,7 +614,7 @@ const styles = StyleSheet.create({
     audioTitle: {
         fontSize: 14,
         fontWeight: '900',
-        color: '#1e293b',
+        color: '#1F5B3A',
     },
     audioSubtitle: {
         fontSize: 11,
@@ -615,7 +625,7 @@ const styles = StyleSheet.create({
     playBtn: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: '#1e293b',
+        backgroundColor: '#1F5B3A',
         paddingHorizontal: 16,
         paddingVertical: 10,
         borderRadius: 14,
@@ -630,7 +640,7 @@ const styles = StyleSheet.create({
         fontWeight: '800',
     },
     qrCard: {
-        backgroundColor: '#1e293b',
+        backgroundColor: '#1F5B3A',
         borderRadius: 24,
         padding: 24,
         marginBottom: 32,
@@ -674,7 +684,7 @@ const styles = StyleSheet.create({
     reviewName: {
         fontSize: 14,
         fontWeight: '800',
-        color: '#1e293b',
+        color: '#1F5B3A',
     },
     starsRow: {
         flexDirection: 'row',
@@ -705,7 +715,7 @@ const styles = StyleSheet.create({
     reviewFormTitle: {
         fontSize: 16,
         fontWeight: '800',
-        color: '#1e293b',
+        color: '#1F5B3A',
     },
     reviewInput: {
         borderWidth: 1,
@@ -713,11 +723,11 @@ const styles = StyleSheet.create({
         borderRadius: 12,
         padding: 12,
         fontSize: 14,
-        color: '#1e293b',
+        color: '#1F5B3A',
         minHeight: 80,
     },
     reviewSubmitBtn: {
-        backgroundColor: '#f97316',
+        backgroundColor: '#D6A64C',
         height: 48,
         borderRadius: 14,
         alignItems: 'center',

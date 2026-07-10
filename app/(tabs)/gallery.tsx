@@ -13,8 +13,10 @@ const columnWidth = (width - 60) / 2;
 
 export default function GalleryScreen() {
     const insets = useSafeAreaInsets();
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const { user } = useAuth();
+    const lang = i18n.language || 'fr';
+    const rtl = lang === 'ar';
     const [galleryItems, setGalleryItems] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [likedIds, setLikedIds] = useState<Set<string>>(new Set());
@@ -220,7 +222,7 @@ export default function GalleryScreen() {
             </View>
 
             {loading ? (
-                <ActivityIndicator size="large" color="#f97316" style={{ marginTop: 40 }} />
+                <ActivityIndicator size="large" color="#D6A64C" style={{ marginTop: 40 }} />
             ) : galleryItems.length === 0 ? (
                 <View style={styles.emptyState}>
                     <Camera size={48} stroke="#cbd5e1" />
@@ -292,7 +294,7 @@ export default function GalleryScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#f8fafc',
+        backgroundColor: '#F8F7F4',
     },
     header: {
         flexDirection: 'row',
@@ -304,16 +306,16 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 28,
         fontWeight: '900',
-        color: '#1e293b',
+        color: '#1F5B3A',
     },
     uploadBtn: {
-        backgroundColor: '#f97316',
+        backgroundColor: '#D6A64C',
         width: 48,
         height: 48,
         borderRadius: 24,
         alignItems: 'center',
         justifyContent: 'center',
-        shadowColor: '#f97316',
+        shadowColor: '#D6A64C',
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.3,
         shadowRadius: 10,
@@ -337,8 +339,8 @@ const styles = StyleSheet.create({
         gap: 6,
     },
     filterChipActive: {
-        backgroundColor: '#f97316',
-        borderColor: '#f97316',
+        backgroundColor: '#D6A64C',
+        borderColor: '#D6A64C',
     },
     filterText: {
         fontSize: 13,
@@ -433,7 +435,7 @@ const styles = StyleSheet.create({
     emptyTitle: {
         fontSize: 18,
         fontWeight: '800',
-        color: '#1e293b',
+        color: '#1F5B3A',
     },
     emptySubtitle: {
         fontSize: 14,

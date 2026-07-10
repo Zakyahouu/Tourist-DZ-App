@@ -10,15 +10,8 @@ import { useTranslation } from 'react-i18next';
 import logger from '@/src/utils/logger';
 
 const CATEGORY_COLORS: Record<string, string> = {
-    historical: '#eab308',
-    natural: '#22c55e',
-    cultural: '#a855f7',
-    thermal: '#3b82f6',
-    accommodation: '#ef4444',
-    default: '#f97316',
+    default: '#D6A64C',
 };
-
-const CATEGORIES = ['all', 'historical', 'natural', 'cultural', 'thermal', 'accommodation'] as const;
 
 // Preload the map asset immediately (not inside component to avoid re-requiring)
 // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -29,7 +22,9 @@ const ExploreScreen = () => {
     const router = useRouter();
     const { t, i18n } = useTranslation();
     const lang = i18n.language || 'fr';
+    const rtl = lang === 'ar';
     const [sites, setSites] = useState<any[]>([]);
+    const [categories, setCategories] = useState<any[]>([]);
     const [searchQuery, setSearchQuery] = useState('');
     const [activeCategory, setActiveCategory] = useState('all');
     const [mapUri, setMapUri] = useState<string | null>(null);
@@ -62,6 +57,7 @@ const ExploreScreen = () => {
                 const mappedAccs = (accData || []).map(acc => ({
                     id: acc.id,
                     name: acc.name,
+                    category_id: acc.category_id,
                     category: 'accommodation',
                     latitude: acc.latitude,
                     longitude: acc.longitude,
@@ -74,12 +70,29 @@ const ExploreScreen = () => {
             }
         }
         fetchMapData();
+        supabase.from('site_categories').select('*').order('sort_order').then(({ data }) => {
+            if (data) setCategories(data);
+        });
     }, []);
+
+    const catLabel = (cat: any) => {
+        if (!cat) return 'default';
+        return cat[`name_${lang}`] || cat.name_fr || cat.name_en || 'default';
+    };
+
+    const catColor = (catId: string) => {
+        if (!catId || catId === 'accommodation') return '#D6A64C';
+        const cat = categories.find(c => c.id === catId);
+        return cat?.color || '#D6A64C';
+    };
 
     const filteredSites = useMemo(() => {
         let result = sites;
         if (activeCategory !== 'all') {
-            result = result.filter(s => s.category === activeCategory);
+            result = result.filter(s => {
+                if (s.is_accommodation) return activeCategory === 'accommodation';
+                return s.category_id === activeCategory;
+            });
         }
         if (searchQuery.trim()) {
             const q = searchQuery.toLowerCase();
@@ -101,9 +114,9 @@ const ExploreScreen = () => {
                 lat: s.latitude,
                 lng: s.longitude,
                 name: s.name?.[lang] || s.name?.fr || s.name || '',
-                category: s.category || 'default',
+                category: s.is_accommodation ? 'accommodation' : (catLabel(categories.find(c => c.id === s.category_id)) || 'default'),
                 isAcc: !!s.is_accommodation,
-                color: CATEGORY_COLORS[s.category as string] || CATEGORY_COLORS.default,
+                color: s.is_accommodation ? '#D6A64C' : catColor(s.category_id),
             }));
         // Use JSON.stringify twice: outer stringify produces a valid JS string literal
         const safeArg = JSON.stringify(JSON.stringify(markers));
@@ -120,7 +133,7 @@ const ExploreScreen = () => {
     }
 
     return (
-        <View style={styles.container}>
+        <View style={[styles.container]}>
             {mapUri ? (
                 <WebView
                     ref={webviewRef}
@@ -137,13 +150,13 @@ const ExploreScreen = () => {
                     startInLoadingState={true}
                     renderLoading={() => (
                         <View style={styles.mapLoader}>
-                            <ActivityIndicator size="large" color="#1e293b" />
+                            <ActivityIndicator size="large" color="#1F5B3A" />
                         </View>
                     )}
                 />
             ) : (
                 <View style={styles.mapLoader}>
-                    <ActivityIndicator size="large" color="#1e293b" />
+                    <ActivityIndicator size="large" color="#1F5B3A" />
                 </View>
             )}
 
@@ -160,17 +173,17 @@ const ExploreScreen = () => {
                     />
                 </View>
                 <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterRow}>
-                    {CATEGORIES.map(cat => (
+                    {[{ id: 'all' }, { id: 'accommodation' }, ...categories].map(cat => (
                         <TouchableOpacity
-                            key={cat}
-                            style={[styles.filterChip, activeCategory === cat && styles.filterChipActive]}
-                            onPress={() => setActiveCategory(cat)}
+                            key={cat.id}
+                            style={[styles.filterChip, activeCategory === cat.id && styles.filterChipActive]}
+                            onPress={() => setActiveCategory(cat.id)}
                         >
-                            {cat !== 'all' && (
-                                <View style={[styles.colorDot, { backgroundColor: CATEGORY_COLORS[cat] }]} />
+                            {cat.id !== 'all' && (
+                                <View style={[styles.colorDot, { backgroundColor: '#D6A64C' }]} />
                             )}
-                            <Text style={[styles.filterText, activeCategory === cat && styles.filterTextActive]}>
-                                {t(`categories.${cat}`)}
+                            <Text style={[styles.filterText, activeCategory === cat.id && styles.filterTextActive]}>
+                                {cat.id === 'all' ? t('categories.all') : cat.id === 'accommodation' ? t('categories.accommodation') : catLabel(cat)}
                             </Text>
                         </TouchableOpacity>
                     ))}
@@ -214,7 +227,7 @@ const styles = StyleSheet.create({
         shadowRadius: 10,
         elevation: 5,
     },
-    searchInput: { flex: 1, fontSize: 14, fontWeight: '600', color: '#1e293b' },
+    searchInput: { flex: 1, fontSize: 14, fontWeight: '600', color: '#1F5B3A' },
     filterRow: { paddingTop: 10, paddingBottom: 4, gap: 8 },
     filterChip: {
         flexDirection: 'row',
@@ -229,7 +242,7 @@ const styles = StyleSheet.create({
         shadowRadius: 4,
         elevation: 2,
     },
-    filterChipActive: { backgroundColor: '#1e293b' },
+    filterChipActive: { backgroundColor: '#1F5B3A' },
     colorDot: { width: 8, height: 8, borderRadius: 4, marginRight: 6 },
     filterText: { fontSize: 12, fontWeight: '700', color: '#64748b' },
     filterTextActive: { color: 'white' },
@@ -238,7 +251,7 @@ const styles = StyleSheet.create({
         width: 60,
         height: 60,
         borderRadius: 30,
-        backgroundColor: '#1e293b',
+        backgroundColor: '#1F5B3A',
         alignItems: 'center',
         justifyContent: 'center',
         shadowColor: '#000',
