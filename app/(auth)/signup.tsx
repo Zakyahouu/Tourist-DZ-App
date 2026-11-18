@@ -60,11 +60,7 @@ export default function SignupScreen() {
             Alert.alert(t('auth.signupFailed'), error.message);
         } else {
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-            Alert.alert(
-                t('common.success'),
-                t('auth.signupSuccess'),
-                [{ text: 'OK', onPress: () => router.replace('/(auth)/login') }]
-            );
+            router.replace('/(tabs)');
         }
     };
 

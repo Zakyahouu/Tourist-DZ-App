@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { StyleSheet, View, Text, ScrollView, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { StyleSheet, View, Text, ScrollView, TextInput, TouchableOpacity, Image, ActivityIndicator } from 'react-native';
 import { Search, MapPin, Calendar, Heart, Camera } from 'lucide-react-native';
 import { StatusBar } from 'expo-status-bar';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -154,7 +154,7 @@ export default function HomeScreen() {
       <StatusBar style="light" />
 
       {/* Hero Section */}
-      <View style={[styles.hero, styles.heroBg, { paddingTop: insets.top + 20 }]}>
+      <View style={[styles.hero, { paddingTop: insets.top + 20 }]}>
         <View style={styles.heroContent}>
           <View style={styles.heroRow}>
             <View style={styles.badge}>
@@ -220,19 +220,17 @@ export default function HomeScreen() {
                   onPress={() => router.push(`/site/${site.id}`)}
                   activeOpacity={0.9}
                 >
-                  <View style={styles.cardImageContainer}>
-                    <ImageBackground
-                      source={site.site_images?.[0]?.image_url ? { uri: site.site_images[0].image_url } : require('../../assets/images/small_panner.jpg')}
-                      style={styles.cardImage}
+                  <View style={[styles.cardImageContainer, { backgroundColor: '#e2e8f0' }]}>
+                    {site.site_images?.[0]?.image_url ? (
+                      <Image source={{ uri: site.site_images[0].image_url }} style={styles.cardImage} />
+                    ) : null}
+                    <TouchableOpacity
+                      style={styles.favoriteBtn}
+                      onPress={() => toggleFavorite(site.id)}
+                      hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                     >
-                      <TouchableOpacity
-                        style={styles.favoriteBtn}
-                        onPress={() => toggleFavorite(site.id)}
-                        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                      >
-                        <Heart size={16} stroke="white" fill={isFav ? 'white' : 'transparent'} />
-                      </TouchableOpacity>
-                    </ImageBackground>
+                      <Heart size={16} stroke="white" fill={isFav ? 'white' : 'transparent'} />
+                    </TouchableOpacity>
                   </View>
                   <View style={styles.cardContent}>
                     <Text style={styles.cardCategory}>{catLabel(categories.find(c => c.id === site.category_id))}</Text>
@@ -283,13 +281,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#F8F7F4',
   },
   hero: {
-    height: 400,
-    width: '100%',
-    paddingHorizontal: 20,
-    justifyContent: 'flex-start',
-  },
-  heroBg: {
     backgroundColor: '#1F5B3A',
+    paddingHorizontal: 20,
+    paddingBottom: 30,
+    justifyContent: 'flex-start',
   },
   heroContent: {
     zIndex: 1,

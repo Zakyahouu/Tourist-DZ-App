@@ -39,17 +39,22 @@ export default function LoginScreen() {
         setLoading(true);
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
-        const { error } = await supabase.auth.signInWithPassword({
-            email: trimmedEmail,
-            password,
-        });
+        try {
+            const { error } = await supabase.auth.signInWithPassword({
+                email: trimmedEmail,
+                password,
+            });
 
-        if (error) {
-            Alert.alert(t('auth.loginFailed'), error.message);
+            if (error) {
+                Alert.alert(t('auth.loginFailed'), error.message);
+                setLoading(false);
+            } else {
+                Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                router.replace('/(tabs)');
+            }
+        } catch (err) {
+            Alert.alert(t('common.error'), err.message || 'Network error');
             setLoading(false);
-        } else {
-            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-            router.replace('/(tabs)');
         }
     };
 
