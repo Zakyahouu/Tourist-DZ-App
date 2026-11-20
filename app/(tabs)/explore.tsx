@@ -132,6 +132,11 @@ const ExploreScreen = () => {
         } catch { }
     }
 
+    function handleCenterMap() {
+        if (!mapReady || !webviewRef.current) return;
+        webviewRef.current.injectJavaScript(`if (typeof map !== 'undefined') { map.flyTo([34.8516, 5.7281], 12); } true;`);
+    }
+
     return (
         <View style={[styles.container]}>
             {mapUri ? (
@@ -194,7 +199,7 @@ const ExploreScreen = () => {
                 <TouchableOpacity style={styles.actionBtn} onPress={() => router.push('/scanner')}>
                     <Camera size={24} color="white" />
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.actionBtn} onPress={() => router.push('/explore')}>
+                <TouchableOpacity style={styles.actionBtn} onPress={handleCenterMap}>
                     <Navigation size={24} color="white" />
                 </TouchableOpacity>
             </View>

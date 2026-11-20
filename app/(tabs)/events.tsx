@@ -25,11 +25,12 @@ export default function EventsScreen() {
     const fetchEvents = useCallback(async () => {
         setLoading(true);
         try {
+            const today = new Date().toISOString().split('T')[0];
             let query = supabase
                 .from('events')
                 .select('*')
                 .eq('is_active', true)
-                .gte('end_date', new Date().toISOString())
+                .or(`end_date.gte.${today},and(end_date.is.null,start_date.gte.${today})`)
                 .order('start_date', { ascending: true });
 
             if (filter !== 'all') {

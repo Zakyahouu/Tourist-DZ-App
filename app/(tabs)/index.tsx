@@ -41,7 +41,7 @@ export default function HomeScreen() {
     try {
       let sitesQuery = supabase
         .from('tourist_sites')
-        .select('*, site_images(image_url)', { count: 'exact' })
+        .select('*, site_images(image_url, is_primary, sort_order)', { count: 'exact' })
         .eq('is_active', true)
         .range(pageNum * PAGE_SIZE, (pageNum + 1) * PAGE_SIZE - 1)
         .order('avg_rating', { ascending: false, nullsFirst: false });
@@ -50,20 +50,27 @@ export default function HomeScreen() {
         sitesQuery = sitesQuery.eq('category_id', activeCategory);
       }
       if (searchQuery.trim()) {
-        const q = searchQuery.trim().toLowerCase();
-        sitesQuery = sitesQuery.or(`name->>fr.ilike.%${q}%,name->>en.ilike.%${q}%,name->>ar.ilike.%${q}%`);
+        const q = searchQuery.trim().replace(/[,()%\\]/g, '').toLowerCase();
+        if (q) {
+          sitesQuery = sitesQuery.or(`name->>fr.ilike.%${q}%,name->>en.ilike.%${q}%,name->>ar.ilike.%${q}%`);
+        }
       }
 
       const sitesRes = await sitesQuery;
 
       if (sitesRes.error) logger.error('fetchSites error:', sitesRes.error);
       if (sitesRes.data) {
+        const sortedData = sitesRes.data.map((s: any) => ({
+          ...s,
+          site_images: [...(s.site_images || [])].sort((a: any, b: any) => (b.is_primary ? 1 : 0) - (a.is_primary ? 1 : 0)),
+        }));
         if (append) {
-          setAllSites(prev => [...prev, ...sitesRes.data]);
+          setAllSites(prev => [...prev, ...sortedData]);
+          setFeaturedSites(prev => [...prev, ...sortedData]);
         } else {
-          setAllSites(sitesRes.data);
+          setAllSites(sortedData);
+          setFeaturedSites(sortedData);
         }
-        setFeaturedSites(sitesRes.data);
         setHasMore(sitesRes.count !== null && (pageNum + 1) * PAGE_SIZE < sitesRes.count);
       }
     } catch (err) {
@@ -80,12 +87,13 @@ export default function HomeScreen() {
     fetchData(nextPage, true);
   };
 
-  // Reset page when category or search changes
+  // Reset page when category or search changes (debounced)
   useEffect(() => {
     setPage(0);
     setAllSites([]);
-    fetchData(0, false);
-  }, [activeCategory, searchQuery]);
+    const timer = setTimeout(() => fetchData(0, false), 300);
+    return () => clearTimeout(timer);
+  }, [activeCategory, searchQuery, fetchData]);
 
   useEffect(() => {
     supabase.from('site_categories').select('*').order('sort_order').then(({ data }) => {
@@ -243,6 +251,19 @@ export default function HomeScreen() {
                 </TouchableOpacity>
               );
             })}
+            {hasMore && (
+              <TouchableOpacity
+                style={[styles.card, { justifyContent: 'center', alignItems: 'center', padding: 20 }]}
+                onPress={handleLoadMore}
+                disabled={loadingMore}
+              >
+                {loadingMore ? (
+                  <ActivityIndicator size="small" color="#D6A64C" />
+                ) : (
+                  <Text style={styles.seeAllText}>{t('home.loadMore')}</Text>
+                )}
+              </TouchableOpacity>
+            )}
           </ScrollView>
         )}
       </View>

@@ -52,8 +52,8 @@ export default function LoginScreen() {
                 Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
                 router.replace('/(tabs)');
             }
-        } catch (err) {
-            Alert.alert(t('common.error'), err.message || 'Network error');
+        } catch (err: any) {
+            Alert.alert(t('common.error'), err?.message || 'Network error');
             setLoading(false);
         }
     };

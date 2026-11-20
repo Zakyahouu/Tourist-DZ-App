@@ -7,6 +7,8 @@ import {
     TouchableOpacity,
     ActivityIndicator,
     Linking,
+    TextInput,
+    Alert,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { supabase } from '../../src/lib/supabase';
@@ -20,7 +22,10 @@ import {
     Phone,
     DollarSign,
     Share2,
-    Heart,
+    Calendar,
+    Users,
+    CheckCircle2,
+    Clock,
 } from 'lucide-react-native';
 import { Image } from 'expo-image';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -39,8 +44,12 @@ export default function AccommodationDetailScreen() {
     const [accommodation, setAccommodation] = useState<any>(null);
     const [category, setCategory] = useState<any>(null);
     const [loading, setLoading] = useState(true);
-    const [isFavorite, setIsFavorite] = useState(false);
-    const [favLoading, setFavLoading] = useState(false);
+    const [existingRequest, setExistingRequest] = useState<any>(null);
+    const [checkIn, setCheckIn] = useState('');
+    const [checkOut, setCheckOut] = useState('');
+    const [guests, setGuests] = useState('1');
+    const [message, setMessage] = useState('');
+    const [submittingBooking, setSubmittingBooking] = useState(false);
     const { user } = useAuth();
 
     const fetchDetails = useCallback(async () => {
@@ -67,46 +76,75 @@ export default function AccommodationDetailScreen() {
         }
     }, [id]);
 
-    const checkFavorite = useCallback(async () => {
+    const checkExistingRequest = useCallback(async () => {
         if (!user || !id) return;
         try {
             const { data } = await supabase
-                .from('favorites')
-                .select('id')
+                .from('accommodation_requests')
+                .select('*')
                 .eq('user_id', user.id)
                 .eq('accommodation_id', id)
-                .single();
-            setIsFavorite(!!data);
+                .maybeSingle();
+            setExistingRequest(data || null);
         } catch (err) {
-            logger.error('checkFavorite error:', err);
+            logger.error('checkExistingRequest error:', err);
         }
     }, [id, user]);
 
     useEffect(() => {
         if (id) {
             fetchDetails();
-            if (user) checkFavorite();
+            if (user) checkExistingRequest();
         }
-    }, [id, user, fetchDetails, checkFavorite]);
+    }, [id, user, fetchDetails, checkExistingRequest]);
 
-    const toggleFavorite = async () => {
+    const handleBookingSubmit = async () => {
         if (!user) {
             router.push('/(auth)/login');
             return;
         }
-        if (favLoading) return;
-        setFavLoading(true);
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-        const newState = !isFavorite;
-        setIsFavorite(newState);
-        if (newState) {
-            const { error } = await supabase.from('favorites').insert({ user_id: user.id, accommodation_id: id });
-            if (error) { logger.error('addFavorite error:', error); setIsFavorite(false); }
-        } else {
-            const { error } = await supabase.from('favorites').delete().eq('user_id', user.id).eq('accommodation_id', id);
-            if (error) { logger.error('removeFavorite error:', error); setIsFavorite(true); }
+        const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+        if (checkIn.trim() && !dateRegex.test(checkIn.trim())) {
+            Alert.alert(t('common.error'), 'Please enter Check-in date in YYYY-MM-DD format.');
+            return;
         }
-        setFavLoading(false);
+        if (checkOut.trim() && !dateRegex.test(checkOut.trim())) {
+            Alert.alert(t('common.error'), 'Please enter Check-out date in YYYY-MM-DD format.');
+            return;
+        }
+        if (checkIn.trim() && checkOut.trim() && checkOut.trim() < checkIn.trim()) {
+            Alert.alert(t('common.error'), 'Check-out date must be after check-in date.');
+            return;
+        }
+        if (submittingBooking) return;
+        setSubmittingBooking(true);
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+        try {
+            const payload = {
+                user_id: user.id,
+                accommodation_id: id,
+                check_in: checkIn.trim() || null,
+                check_out: checkOut.trim() || null,
+                guests: Math.max(1, parseInt(guests, 10) || 1),
+                message: message.trim() || null,
+                status: 'pending',
+                rejection_reason: null,
+            };
+            const { data, error } = await supabase
+                .from('accommodation_requests')
+                .upsert(payload, { onConflict: 'user_id,accommodation_id' })
+                .select()
+                .single();
+            if (error) throw error;
+            setExistingRequest(data);
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+            Alert.alert(t('common.success'), 'Booking request sent!');
+        } catch (err: any) {
+            logger.error('booking submit error:', err);
+            Alert.alert(t('common.error'), err?.message || t('common.unknownError'));
+        } finally {
+            setSubmittingBooking(false);
+        }
     };
 
     const isSafeUrl = (url: string) => {
@@ -190,9 +228,6 @@ export default function AccommodationDetailScreen() {
                         {rtl ? <ArrowRight size={22} stroke="white" /> : <ArrowLeft size={22} stroke="white" />}
                     </TouchableOpacity>
                     <View style={{ flexDirection: 'row', gap: 10 }}>
-                        <TouchableOpacity style={styles.shareBtn} onPress={toggleFavorite} disabled={favLoading}>
-                            <Heart size={20} stroke="white" fill={isFavorite ? 'white' : 'transparent'} />
-                        </TouchableOpacity>
                         <TouchableOpacity style={styles.shareBtn} onPress={handleShare}>
                             <Share2 size={20} stroke="white" />
                         </TouchableOpacity>
@@ -205,7 +240,7 @@ export default function AccommodationDetailScreen() {
                 <View style={styles.badgeRow}>
                     <View style={styles.typeBadge}>
                         <Text style={styles.typeBadgeText}>
-                            {category?.[`name_${lang}`] || category?.name_fr || category?.name_en || accommodation.type || ''}
+                            {category?.[`name_${lang}`] || category?.name_fr || category?.name_en || ''}
                         </Text>
                     </View>
                     {accommodation.rating > 0 && (
@@ -302,6 +337,97 @@ export default function AccommodationDetailScreen() {
                     )}
                 </View>
 
+                {/* Request Booking Card */}
+                <View style={styles.card}>
+                    <Text style={styles.cardTitle}>{t('profile.accommodationRequests') || 'Request Booking'}</Text>
+                    {existingRequest && existingRequest.status !== 'cancelled' && existingRequest.status !== 'rejected' ? (
+                        <View style={styles.requestStatusBox}>
+                            <View style={styles.requestStatusRow}>
+                                {existingRequest.status === 'accepted' ? (
+                                    <CheckCircle2 size={18} stroke="#059669" />
+                                ) : (
+                                    <Clock size={18} stroke="#d97706" />
+                                )}
+                                <Text style={styles.requestStatusTitle}>
+                                    {existingRequest.status.toUpperCase()}
+                                </Text>
+                            </View>
+                            <Text style={styles.requestStatusSub}>
+                                {existingRequest.guests} {existingRequest.guests === 1 ? 'Guest' : 'Guests'}
+                                {existingRequest.check_in ? ` · ${existingRequest.check_in}` : ''}
+                                {existingRequest.check_out ? ` → ${existingRequest.check_out}` : ''}
+                            </Text>
+                            <TouchableOpacity
+                                style={[styles.bookingBtn, { marginTop: 12, backgroundColor: '#0891b2' }]}
+                                onPress={() => router.push('/bookings')}
+                            >
+                                <Text style={styles.bookingBtnText}>{t('profile.bookings') || 'View My Bookings'}</Text>
+                            </TouchableOpacity>
+                        </View>
+                    ) : (
+                        <View style={{ gap: 10 }}>
+                            <View style={{ flexDirection: 'row', gap: 10 }}>
+                                <View style={{ flex: 1 }}>
+                                    <Text style={styles.inputLabel}>CHECK-IN (YYYY-MM-DD)</Text>
+                                    <TextInput
+                                        style={styles.bookingInput}
+                                        placeholder="2026-12-01"
+                                        placeholderTextColor="#94a3b8"
+                                        value={checkIn}
+                                        onChangeText={setCheckIn}
+                                    />
+                                </View>
+                                <View style={{ flex: 1 }}>
+                                    <Text style={styles.inputLabel}>CHECK-OUT (YYYY-MM-DD)</Text>
+                                    <TextInput
+                                        style={styles.bookingInput}
+                                        placeholder="2026-12-05"
+                                        placeholderTextColor="#94a3b8"
+                                        value={checkOut}
+                                        onChangeText={setCheckOut}
+                                    />
+                                </View>
+                            </View>
+                            <View>
+                                <Text style={styles.inputLabel}>GUESTS</Text>
+                                <TextInput
+                                    style={styles.bookingInput}
+                                    placeholder="1"
+                                    placeholderTextColor="#94a3b8"
+                                    keyboardType="number-pad"
+                                    value={guests}
+                                    onChangeText={setGuests}
+                                />
+                            </View>
+                            <View>
+                                <Text style={styles.inputLabel}>MESSAGE (OPTIONAL)</Text>
+                                <TextInput
+                                    style={[styles.bookingInput, { minHeight: 64, textAlignVertical: 'top' }]}
+                                    placeholder="Special requests..."
+                                    placeholderTextColor="#94a3b8"
+                                    multiline
+                                    value={message}
+                                    onChangeText={setMessage}
+                                />
+                            </View>
+                            <TouchableOpacity
+                                style={[styles.bookingBtn, submittingBooking && { opacity: 0.6 }]}
+                                onPress={handleBookingSubmit}
+                                disabled={submittingBooking}
+                            >
+                                {submittingBooking ? (
+                                    <ActivityIndicator size="small" color="white" />
+                                ) : (
+                                    <>
+                                        <Calendar size={18} stroke="white" />
+                                        <Text style={styles.bookingBtnText}>{t('common.submit') || 'Request Booking'}</Text>
+                                    </>
+                                )}
+                            </TouchableOpacity>
+                        </View>
+                    )}
+                </View>
+
                 {/* Get Directions Button */}
                 {accommodation.latitude && accommodation.longitude && (
                     <TouchableOpacity style={styles.directionsBtn} onPress={handleDirections}>
@@ -347,4 +473,12 @@ const styles = StyleSheet.create({
     contactValue: { fontSize: 15, fontWeight: '700', color: '#1F5B3A' },
     directionsBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, backgroundColor: '#1F5B3A', borderRadius: 20, paddingVertical: 18, marginBottom: 40 },
     directionsBtnText: { color: 'white', fontSize: 16, fontWeight: '800' },
+    inputLabel: { fontSize: 10, fontWeight: '800', color: '#94a3b8', letterSpacing: 1, marginBottom: 4 },
+    bookingInput: { borderWidth: 1, borderColor: '#e2e8f0', borderRadius: 12, paddingHorizontal: 12, paddingVertical: 10, fontSize: 14, color: '#1F5B3A', backgroundColor: '#F8F7F4', fontWeight: '600' },
+    bookingBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: '#D6A64C', borderRadius: 14, paddingVertical: 14, marginTop: 4 },
+    bookingBtnText: { color: 'white', fontSize: 15, fontWeight: '800' },
+    requestStatusBox: { backgroundColor: '#f0fdf4', borderRadius: 16, padding: 14, borderWidth: 1, borderColor: '#bbf7d0' },
+    requestStatusRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 4 },
+    requestStatusTitle: { fontSize: 14, fontWeight: '900', color: '#166534' },
+    requestStatusSub: { fontSize: 13, fontWeight: '600', color: '#15803d' },
 });

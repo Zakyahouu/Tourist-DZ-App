@@ -34,11 +34,11 @@ export default function BookingsScreen() {
     const lang = i18n.language || 'fr';
     const rtl = lang === 'ar';
 
-    const [eventRegistrations, setEventRegistrations] = useState([]);
-    const [accommodationRequests, setAccommodationRequests] = useState([]);
-    const [eventCategories, setEventCategories] = useState([]);
+    const [eventRegistrations, setEventRegistrations] = useState<any[]>([]);
+    const [accommodationRequests, setAccommodationRequests] = useState<any[]>([]);
+    const [eventCategories, setEventCategories] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
-    const [announcementsModal, setAnnouncementsModal] = useState(null);
+    const [announcementsModal, setAnnouncementsModal] = useState<{ event: any; announcements: any[] } | null>(null);
 
     const fetchData = useCallback(async () => {
         if (!user) {
@@ -49,14 +49,14 @@ export default function BookingsScreen() {
             const [evtRes, accRes, catRes] = await Promise.all([
                 supabase
                     .from('event_registrations')
-                    .select('id, status, registered_at, events(id, title, start_date, location, category_id)')
+                    .select('id, status, registered_at, rejection_reason, events(id, title, start_date, end_date, location, category_id)')
                     .eq('user_id', user.id)
                     .order('registered_at', { ascending: false }),
                 supabase
                     .from('accommodation_requests')
-                    .select('id, status, requested_at, rejection_reason, accommodations(id, title, location, start_date, end_date)')
+                    .select('id, status, created_at, check_in, check_out, guests, message, rejection_reason, accommodations(id, name, address, category_id)')
                     .eq('user_id', user.id)
-                    .order('requested_at', { ascending: false }),
+                    .order('created_at', { ascending: false }),
                 supabase.from('event_categories').select('*').order('sort_order'),
             ]);
             if (evtRes.error) throw evtRes.error;
@@ -76,7 +76,7 @@ export default function BookingsScreen() {
         fetchData();
     }, [fetchData]);
 
-    const handleCancelEvent = async (registrationId) => {
+    const handleCancelEvent = async (registrationId: string) => {
         Alert.alert(
             t('profile.cancelRegistration'),
             t('profile.cancelConfirm'),
@@ -105,7 +105,36 @@ export default function BookingsScreen() {
         );
     };
 
-    const viewAnnouncements = async (evt) => {
+    const handleCancelAccommodation = async (requestId: string) => {
+        Alert.alert(
+            t('profile.cancelRegistration'),
+            t('profile.cancelConfirm'),
+            [
+                { text: t('common.cancel'), style: 'cancel' },
+                {
+                    text: t('profile.yesCancel'),
+                    style: 'destructive',
+                    onPress: async () => {
+                        try {
+                            const { error } = await supabase
+                                .from('accommodation_requests')
+                                .delete()
+                                .eq('id', requestId);
+                            if (error) throw error;
+                            setAccommodationRequests((prev) =>
+                                prev.filter((a) => a.id !== requestId)
+                            );
+                        } catch (err) {
+                            logger.error(err);
+                            Alert.alert(t('common.error'), t('profile.cancelFailed'));
+                        }
+                    },
+                },
+            ]
+        );
+    };
+
+    const viewAnnouncements = async (evt: any) => {
         try {
             const { data } = await supabase
                 .from('event_announcements')
@@ -119,7 +148,7 @@ export default function BookingsScreen() {
         }
     };
 
-    const getStatusColors = (status) => {
+    const getStatusColors = (status?: string) => {
         const s = (status || 'pending').toLowerCase();
         switch (s) {
             case 'accepted':
@@ -134,7 +163,7 @@ export default function BookingsScreen() {
         }
     };
 
-    const StatusIcon = ({ status }) => {
+    const StatusIcon = ({ status }: { status?: string }) => {
         const s = (status || 'pending').toLowerCase();
         if (s === 'accepted' || s === 'confirmed') {
             return <CheckCircle2 size={12} stroke="#059669" />;
@@ -307,31 +336,32 @@ export default function BookingsScreen() {
                                                 </View>
                                             </View>
                                             <Text style={styles.cardTitle}>
-                                                {acc.title?.[i18n.language] ||
-                                                    acc.title?.fr ||
+                                                {acc.name?.[i18n.language] ||
+                                                    acc.name?.fr ||
+                                                    acc.name?.en ||
                                                     'Accommodation'}
                                             </Text>
                                             <View style={styles.cardMeta}>
-                                                {acc.start_date ? (
+                                                {req.check_in ? (
                                                     <View style={styles.metaItem}>
                                                         <Calendar size={14} stroke="#64748b" />
                                                         <Text style={styles.metaText}>
                                                             {new Date(
-                                                                acc.start_date
+                                                                req.check_in
                                                             ).toLocaleDateString()}
-                                                            {acc.end_date
+                                                            {req.check_out
                                                                 ? ` – ${new Date(
-                                                                      acc.end_date
+                                                                      req.check_out
                                                                   ).toLocaleDateString()}`
                                                                 : ''}
                                                         </Text>
                                                     </View>
                                                 ) : null}
-                                                {acc.location ? (
+                                                {acc.address ? (
                                                     <View style={styles.metaItem}>
                                                         <MapPin size={14} stroke="#64748b" />
                                                         <Text style={styles.metaText}>
-                                                            {acc.location}
+                                                            {acc.address}
                                                         </Text>
                                                     </View>
                                                 ) : null}
@@ -342,6 +372,18 @@ export default function BookingsScreen() {
                                                         Reason: {req.rejection_reason}
                                                     </Text>
                                                 )}
+                                            {req.status === 'pending' && (
+                                                <View style={[styles.cardActions, { marginTop: 8 }]}>
+                                                    <TouchableOpacity
+                                                        style={styles.cancelBtn}
+                                                        onPress={() => handleCancelAccommodation(req.id)}
+                                                    >
+                                                        <Text style={styles.cancelBtnText}>
+                                                            {t('profile.cancelRegistration')}
+                                                        </Text>
+                                                    </TouchableOpacity>
+                                                </View>
+                                            )}
                                         </View>
                                     );
                                 })}

@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, ScrollView, Image, ActivityIndicator, Alert } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, ScrollView, Image, ActivityIndicator, Alert, Modal } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '@/src/context/AuthContext';
-import { User, Settings, Heart, Calendar, LogOut, ChevronRight, Share2, Shield, Star, List } from 'lucide-react-native';
+import { User, Settings, Heart, Calendar, LogOut, ChevronRight, Share2, Shield, Star, List, X, MapPin } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { supabase } from '@/src/lib/supabase';
@@ -24,6 +24,46 @@ export default function ProfileScreen() {
     const isAdmin = profile?.role === 'admin';
 
     const [stats, setStats] = useState({ favorites: 0, events: 0, reviews: 0 });
+    const [activeModal, setActiveModal] = useState<'favorites' | 'reviews' | null>(null);
+    const [modalLoading, setModalLoading] = useState(false);
+    const [favoriteSites, setFavoriteSites] = useState<any[]>([]);
+    const [myReviews, setMyReviews] = useState<any[]>([]);
+
+    const openFavoritesModal = async () => {
+        if (!user) return;
+        setActiveModal('favorites');
+        setModalLoading(true);
+        try {
+            const { data } = await supabase
+                .from('favorites')
+                .select('id, tourist_sites(id, name, address, avg_rating)')
+                .eq('user_id', user.id)
+                .order('created_at', { ascending: false });
+            setFavoriteSites(data || []);
+        } catch (err) {
+            logger.error('openFavoritesModal error:', err);
+        } finally {
+            setModalLoading(false);
+        }
+    };
+
+    const openReviewsModal = async () => {
+        if (!user) return;
+        setActiveModal('reviews');
+        setModalLoading(true);
+        try {
+            const { data } = await supabase
+                .from('reviews')
+                .select('id, rating, comment, created_at, tourist_sites(id, name)')
+                .eq('user_id', user.id)
+                .order('created_at', { ascending: false });
+            setMyReviews(data || []);
+        } catch (err) {
+            logger.error('openReviewsModal error:', err);
+        } finally {
+            setModalLoading(false);
+        }
+    };
 
     const fetchStats = useCallback(async () => {
         if (!user) return;
@@ -164,10 +204,10 @@ export default function ProfileScreen() {
 
             <View style={styles.section}>
                 <Text style={styles.sectionTitle}>{t('profile.myActivity')}</Text>
-                <MenuItem icon={Heart} title={t('profile.myFavorites')} color="#ef4444" onPress={() => Alert.alert(t('profile.favorites'), t('profile.comingSoon'))} />
+                <MenuItem icon={Heart} title={t('profile.myFavorites')} color="#ef4444" onPress={openFavoritesModal} />
                 <MenuItem icon={Calendar} title={t('profile.myEvents')} color="#3b82f6" onPress={() => router.push('/bookings')} />
-                <MenuItem icon={List} title="My Bookings" color="#0891b2" onPress={() => router.push('/bookings')} />
-                <MenuItem icon={Star} title={t('profile.myReviews')} color="#f59e0b" onPress={() => Alert.alert(t('profile.reviews'), t('profile.comingSoon'))} />
+                <MenuItem icon={List} title={t('profile.bookings')} color="#0891b2" onPress={() => router.push('/bookings')} />
+                <MenuItem icon={Star} title={t('profile.myReviews')} color="#f59e0b" onPress={openReviewsModal} />
                 <MenuItem icon={Heart} title={t('solidarity.title')} color="#e11d48" onPress={() => router.push('/solidarity')} />
             </View>
 
@@ -200,6 +240,84 @@ export default function ProfileScreen() {
             </TouchableOpacity>
 
             <Text style={styles.versionText}>Version 1.0.0 (Expo)</Text>
+
+            {/* Favorites / Reviews Modal */}
+            <Modal
+                visible={!!activeModal}
+                transparent
+                animationType="slide"
+                onRequestClose={() => setActiveModal(null)}
+            >
+                <View style={styles.modalOverlay}>
+                    <View style={styles.modalSheet}>
+                        <View style={styles.modalHeader}>
+                            <Text style={styles.modalTitle}>
+                                {activeModal === 'favorites' ? t('profile.myFavorites') : t('profile.myReviews')}
+                            </Text>
+                            <TouchableOpacity onPress={() => setActiveModal(null)} style={styles.modalCloseBtn}>
+                                <X size={20} stroke="#64748b" />
+                            </TouchableOpacity>
+                        </View>
+                        {modalLoading ? (
+                            <ActivityIndicator size="large" color="#1F5B3A" style={{ marginVertical: 40 }} />
+                        ) : activeModal === 'favorites' ? (
+                            favoriteSites.length === 0 ? (
+                                <Text style={styles.modalEmpty}>{t('details.noReviews').replace(/reviews|avis|مراجعات/i, t('profile.favorites')) || 'No favorites yet.'}</Text>
+                            ) : (
+                                <ScrollView showsVerticalScrollIndicator={false}>
+                                    {favoriteSites.map((fav) => {
+                                        const s = fav.tourist_sites;
+                                        if (!s) return null;
+                                        return (
+                                            <TouchableOpacity
+                                                key={fav.id}
+                                                style={styles.modalCard}
+                                                onPress={() => {
+                                                    setActiveModal(null);
+                                                    router.push(`/site/${s.id}`);
+                                                }}
+                                            >
+                                                <View style={{ flex: 1 }}>
+                                                    <Text style={styles.modalCardTitle}>{s.name?.[lang] || s.name?.fr || s.name?.en}</Text>
+                                                    {s.address ? (
+                                                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 4 }}>
+                                                            <MapPin size={12} stroke="#64748b" />
+                                                            <Text style={styles.modalCardSub}>{s.address}</Text>
+                                                        </View>
+                                                    ) : null}
+                                                </View>
+                                                <ChevronRight size={18} stroke="#cbd5e1" />
+                                            </TouchableOpacity>
+                                        );
+                                    })}
+                                </ScrollView>
+                            )
+                        ) : (
+                            myReviews.length === 0 ? (
+                                <Text style={styles.modalEmpty}>{t('details.noReviews')}</Text>
+                            ) : (
+                                <ScrollView showsVerticalScrollIndicator={false}>
+                                    {myReviews.map((rev) => (
+                                        <View key={rev.id} style={styles.modalCard}>
+                                            <View style={{ flex: 1 }}>
+                                                <Text style={styles.modalCardTitle}>
+                                                    {rev.tourist_sites?.name?.[lang] || rev.tourist_sites?.name?.fr || 'Site'}
+                                                </Text>
+                                                <View style={{ flexDirection: 'row', gap: 2, marginVertical: 4 }}>
+                                                    {[1, 2, 3, 4, 5].map(i => (
+                                                        <Star key={i} size={12} stroke="#f59e0b" fill={i <= rev.rating ? '#f59e0b' : 'transparent'} />
+                                                    ))}
+                                                </View>
+                                                {rev.comment ? <Text style={styles.modalCardSub}>{rev.comment}</Text> : null}
+                                            </View>
+                                        </View>
+                                    ))}
+                                </ScrollView>
+                            )
+                        )}
+                    </View>
+                </View>
+            </Modal>
         </ScrollView>
     );
 }
@@ -463,5 +581,58 @@ const styles = StyleSheet.create({
     },
     langTextActive: {
         color: 'white',
+    },
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0,0,0,0.4)',
+        justifyContent: 'flex-end',
+    },
+    modalSheet: {
+        backgroundColor: 'white',
+        borderTopLeftRadius: 28,
+        borderTopRightRadius: 28,
+        padding: 24,
+        maxHeight: '75%',
+    },
+    modalHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 16,
+    },
+    modalTitle: {
+        fontSize: 20,
+        fontWeight: '900',
+        color: '#1F5B3A',
+    },
+    modalCloseBtn: {
+        padding: 6,
+        borderRadius: 12,
+        backgroundColor: '#f1f5f9',
+    },
+    modalEmpty: {
+        textAlign: 'center',
+        color: '#94a3b8',
+        fontSize: 14,
+        paddingVertical: 40,
+        fontWeight: '600',
+    },
+    modalCard: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#F8F7F4',
+        padding: 14,
+        borderRadius: 16,
+        marginBottom: 10,
+    },
+    modalCardTitle: {
+        fontSize: 15,
+        fontWeight: '800',
+        color: '#1F5B3A',
+    },
+    modalCardSub: {
+        fontSize: 12,
+        color: '#64748b',
+        fontWeight: '500',
     },
 });

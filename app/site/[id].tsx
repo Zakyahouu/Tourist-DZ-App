@@ -54,7 +54,7 @@ export default function SiteDetailScreen() {
         try {
             const { data, error } = await supabase
                 .from('tourist_sites')
-                .select('*, site_images(image_url), reviews(rating, comment, created_at, profiles(full_name, avatar_url))')
+                .select('*, site_images(image_url, is_primary, sort_order), reviews(rating, comment, created_at, profiles(full_name, avatar_url))')
                 .eq('id', id)
                 .single();
 
@@ -82,7 +82,7 @@ export default function SiteDetailScreen() {
                 .select('id')
                 .eq('user_id', user.id)
                 .eq('site_id', id)
-                .single();
+                .maybeSingle();
             setIsFavorite(!!data);
         } catch (err) {
             logger.error('checkFavorite error:', err);
@@ -183,7 +183,10 @@ export default function SiteDetailScreen() {
         );
     }
 
-    const images = site.site_images?.map((img: any) => img.image_url) || [];
+    const images = [...(site.site_images || [])]
+        .sort((a: any, b: any) => (b.is_primary ? 1 : 0) - (a.is_primary ? 1 : 0))
+        .map((img: any) => img.image_url)
+        .filter(Boolean);
     const hasCover = images.length > 0;
 
     return (

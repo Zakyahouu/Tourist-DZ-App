@@ -77,7 +77,7 @@ export default function EventDetailScreen() {
                 .select('id')
                 .eq('event_id', id)
                 .eq('user_id', user.id)
-                .single();
+                .maybeSingle();
             if (data) setIsRegistered(true);
         } catch (err) {
             logger.error('checkRegistration error:', err);

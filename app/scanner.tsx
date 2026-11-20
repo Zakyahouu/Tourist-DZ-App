@@ -54,19 +54,32 @@ export default function ScannerScreen() {
         // Example: https://zibango.dz/site/ID
         if (data.includes('site/')) {
             const parts = data.split('site/');
-            const id = parts[parts.length - 1];
-            router.replace(`/site/${id}`);
+            const id = parts[parts.length - 1].split(/[/?#]/)[0];
+            if (id) {
+                router.replace(`/site/${id}`);
+                return;
+            }
         } else if (data.includes('event/')) {
             const parts = data.split('event/');
-            const id = parts[parts.length - 1];
-            router.replace(`/event/${id}`);
-        } else {
-            Alert.alert(
-                t('scanner.scanned'),
-                data,
-                [{ text: 'OK', onPress: () => setScanned(false) }]
-            );
+            const id = parts[parts.length - 1].split(/[/?#]/)[0];
+            if (id) {
+                router.replace(`/event/${id}`);
+                return;
+            }
+        } else if (data.includes('accommodation/')) {
+            const parts = data.split('accommodation/');
+            const id = parts[parts.length - 1].split(/[/?#]/)[0];
+            if (id) {
+                router.replace(`/accommodation/${id}`);
+                return;
+            }
         }
+
+        Alert.alert(
+            t('scanner.scanned'),
+            data,
+            [{ text: 'OK', onPress: () => setScanned(false) }]
+        );
     };
 
     return (
